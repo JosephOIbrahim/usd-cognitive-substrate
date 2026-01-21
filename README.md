@@ -96,7 +96,7 @@ The USD Cognitive Substrate is implemented by **Framework Orchestrator**:
 ```bibtex
 @techreport{usd_cognitive_substrate_2026,
   title={USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management},
-  author={Ibrahim, Joe},
+  author={Ibrahim, Joseph O.},
   year={2026},
   month={January},
   institution={Independent Research},
@@ -131,4 +131,4 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 **Date**: 2026-01-21
 **Status**: Pre-Publication Draft
-**Author**: Joe Ibrahim
+**Author**: Joseph O. Ibrahim

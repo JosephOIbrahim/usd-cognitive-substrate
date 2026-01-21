@@ -2,7 +2,7 @@
 
 **Challenging the Energy-Intelligence Equivalence Through Composable Knowledge Architectures**
 
-**Author:** Joseph Ibrahim
+**Author:** Joseph O. Ibrahim
 **Date:** January 2026
 **Status:** Academic Pre-Publication Draft
 

@@ -2,7 +2,7 @@
 
 **Date:** 2026-01-21
 **Status:** Academic Pre-Publication Draft
-**Authors:** Joe Ibrahim
+**Authors:** Joseph O. Ibrahim
 
 ---
 
