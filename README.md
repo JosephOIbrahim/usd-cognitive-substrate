@@ -1,10 +1,9 @@
-# USD Cognitive Substrate V5.1
+# USD Cognitive Substrate
 
 **A Deterministic Architecture for Adaptive AI State Management**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Pre--Publication-blue.svg)]()
-[![Version](https://img.shields.io/badge/Version-5.1.0-green.svg)](USD_COGNITIVE_SUBSTRATE_V5.1.md)
 
 ---
 
@@ -22,7 +21,7 @@ The architecture achieves **fully deterministic cognitive behavior** from signal
 
 | Document | Description |
 |----------|-------------|
-| [**USD_COGNITIVE_SUBSTRATE_V5.1.md**](USD_COGNITIVE_SUBSTRATE_V5.1.md) | Main specification (~900 lines) |
+| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE_V5.1.md) | Main specification (~900 lines) |
 | [PERSISTENT_STATE_HYPOTHESIS.md](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |
 | [DETERMINISM.md](DETERMINISM.md) | Determinism analysis |
 
@@ -81,18 +80,6 @@ The thesis would be **FALSIFIED** if:
 
 ---
 
-## V5.1 Enhancements
-
-| Section | Enhancement | Impact |
-|---------|-------------|--------|
-| 6.4 | Formal Mathematical Specification | Theoretical Rigor |
-| 6.5 | Worked Example (Complete Trace) | Practical Applicability |
-| 8.5 | Failure Mode Analysis | Production Readiness |
-| 13.4 | Known Limitations | Intellectual Honesty |
-| 13.5 | Falsifiability Criteria | Scientific Rigor |
-
----
-
 ## Reference Implementation
 
 The USD Cognitive Substrate is implemented by **Framework Orchestrator**:
@@ -112,7 +99,6 @@ The USD Cognitive Substrate is implemented by **Framework Orchestrator**:
   author={Ibrahim, Joe},
   year={2026},
   month={January},
-  version={5.1.0},
   institution={Independent Research},
   url={https://github.com/joe002/usd-cognitive-substrate},
   note={Pre-publication draft. Reference implementation: https://github.com/joe002/framework-orchestrator}
@@ -143,7 +129,6 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Version**: 5.1.0
 **Date**: 2026-01-21
 **Status**: Pre-Publication Draft
 **Author**: Joe Ibrahim
