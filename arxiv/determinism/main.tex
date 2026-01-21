@@ -80,6 +80,19 @@ This occurs because:
 
 \textbf{Key insight}: $(a + b) + c \neq a + (b + c)$ in floating-point arithmetic. When reduction order changes, numerics change.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/figure3-determinism.pdf}
+    \caption{Determinism Boundary in AI-Human Interaction. Human agency
+             (user input and responses) remains inherently stochastic and
+             irreducible. With ThinkingMachines batch-invariant kernels,
+             the entire computational pipeline becomes deterministic:
+             signal detection, routing, expert selection, LLM generation,
+             and state updates all guarantee that
+             \textit{Same input + Same state $\rightarrow$ Same output + Same state update}.}
+    \label{fig:determinism-boundary}
+\end{figure}
+
 \section{The Solution: Batch-Invariant Design}
 
 \subsection{Framework Orchestrator's Approach}

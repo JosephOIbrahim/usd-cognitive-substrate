@@ -161,6 +161,31 @@ ThinkingMachines (2025) demonstrated this empirically: \textbf{80 unique complet
 
 ThinkingMachines batch-invariant kernels eliminate these sources at a cost of $\sim$1.6--2.1$\times$ performance overhead.
 
+\subsection{Related Work}
+
+\textbf{Cognitive Architectures:}
+\begin{itemize}
+    \item \textbf{ACT-R} \cite{anderson2007mind}: Production system with memory modules; no determinism guarantees
+    \item \textbf{SOAR} \cite{laird2012soar}: Goal-oriented with learning; no composition semantics
+    \item \textbf{LIDA} \cite{franklin2016lida}: Global workspace theory; no persistent state format
+\end{itemize}
+
+\textbf{LLM State Management:}
+\begin{itemize}
+    \item \textbf{LangChain Memory}: Simple key-value storage; no composition or conflict resolution
+    \item \textbf{MemGPT}: Tiered memory with LLM-controlled paging; not deterministic
+    \item \textbf{RAG Systems} \cite{lewis2020rag}: Retrieval-augmented generation; addresses knowledge, not behavioral state
+\end{itemize}
+
+\textbf{Deterministic Inference:}
+\begin{itemize}
+    \item \textbf{ThinkingMachines} \cite{thinkingmachines2025}: Batch-invariant kernels; we build upon this foundation
+    \item \textbf{vLLM}: Optimized serving; not deterministic
+    \item \textbf{TensorRT-LLM}: Compilation optimization; determinism not guaranteed
+\end{itemize}
+
+Our work differs by providing: (1) a formal composition hierarchy with LIVRPS resolution, (2) bounded neuroplasticity through the Mycelium mechanism, and (3) integration with batch-invariant inference for end-to-end determinism.
+
 \section{Architecture Overview}
 
 The USD Cognitive Substrate comprises two orthogonal hierarchies:
@@ -216,9 +241,17 @@ By construction, clip enforces $w_i \geq f_i$, and $Z$ normalizes sum to 1.
 $|U(w, o, a)_i - w_i| \leq \alpha \times \max(|o - e|) \times \max(\|a\|_\infty) \leq 0.2 \times 1 \times 1 = 0.2$
 \end{theorem}
 
+\begin{proof}
+Before normalization, $w'_i = \text{clip}(w_i + \alpha(o - e)a_i, f_i, 1.0)$. The maximum change is $|\alpha(o-e)a_i| \leq \alpha \times |o-e| \times |a_i|$. With $\alpha \leq 0.2$, $|o-e| \leq 1$, and $|a_i| \leq 1$, the pre-normalization change is bounded by $0.2$. Normalization can only reduce differences (it's a contraction), so the bound holds.
+\end{proof}
+
 \begin{theorem}[Convergence]
 Under stationary outcome distribution, $w$ converges to $E[o \times a] / \sum_i E[o \times a_i]$.
 \end{theorem}
+
+\begin{proof}[Proof Sketch]
+This follows from standard Hebbian learning convergence results. At equilibrium, $E[\Delta w_i] = 0$, which implies $E[(o-e)a_i] = 0$ for all $i$ relative to current weights. Solving for the fixed point yields $w^*_i \propto E[o \cdot a_i]$, normalized to sum to 1. Full convergence proof requires additional conditions on outcome distribution boundedness (satisfied by $o \in [-1,1]$).
+\end{proof}
 
 \section{Determinism Analysis}
 
@@ -328,6 +361,20 @@ The USD Cognitive Substrate thesis would be \textbf{FALSIFIED} if:
     \item \textbf{Safety Floor Violation}: Any execution path allows expert weights to fall below safety floors
     \item \textbf{Determinism Failure}: With ThinkingMachines, identical inputs produce different outputs in $>$0.01\% of cases
     \item \textbf{Practical Inferiority}: A simpler system achieves equivalent routing accuracy with $<$50\% of the specification complexity
+\end{enumerate}
+
+\section{Known Limitations}
+
+\begin{enumerate}
+    \item \textbf{Keyword-Based Signal Detection}: Triggers rely on keyword matching rather than semantic understanding. Full semantic detection requires LLM-in-the-loop, reintroducing non-determinism. Future work: learned embeddings with quantized similarity for deterministic semantic matching.
+
+    \item \textbf{Single-Model Assumption}: The current design assumes one LLM. Multi-model routing (different models for different experts) adds complexity not addressed in this specification.
+
+    \item \textbf{Cold Start Problem}: New users have uniform weights. Initial sessions may have suboptimal routing until Hebbian learning accumulates sufficient data. Mitigation: calibration wizard for initial weight setting.
+
+    \item \textbf{Performance Trade-off}: ThinkingMachines batch-invariance has performance cost: 2.1$\times$ slowdown with unoptimized kernels, 1.6$\times$ with optimized attention, $\sim$20\% MatMul loss vs cuBLAS. For latency-sensitive applications, hybrid mode (deterministic routing, probabilistic generation) may be necessary.
+
+    \item \textbf{USD Ecosystem Maturity}: While USD is an industry standard for VFX, its ecosystem outside visual effects is nascent. Python pxr bindings are mature; other language bindings less so.
 \end{enumerate}
 
 \section{Conclusion}
