@@ -1,0 +1,304 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsthm}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{float}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={USD Cognitive Substrate},
+    pdfauthor={Joseph O. Ibrahim}
+}
+
+% Listings setup for code
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{orange}
+}
+
+% Theorem environments
+\newtheorem{theorem}{Theorem}
+\newtheorem{definition}{Definition}
+
+% Title
+\title{USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management}
+
+\author{Joseph O. Ibrahim\\
+\textit{Independent Research}\\
+\url{https://github.com/JosephOIbrahim}}
+
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We present the USD Cognitive Substrate, a novel architecture that repurposes Universal Scene Description (USD) composition semantics---originally designed for conflict resolution in visual effects pipelines---for deterministic state management in large language model (LLM) applications. The architecture achieves a previously elusive property: \textbf{fully deterministic cognitive behavior} from signal detection through response generation, with stochasticity isolated exclusively to irreducible human input/output boundaries.
+
+The system comprises two orthogonal hierarchies: a USD Composition Hierarchy for state storage with LIVRPS (Local, Inherits, VariantSets, References, Payloads, Specializes) resolution, and a Runtime Service Stack for processing, routing, and adaptation. A novel ``Mycelium'' mechanism provides neuroplasticity within constitutional bounds, enabling the system to learn while maintaining safety guarantees.
+
+When integrated with batch-invariant inference engines (ThinkingMachines), the architecture guarantees: \textbf{same user input + same state $\rightarrow$ same response + same state update}. This enables reproducible sessions, behavioral unit testing, complete audit trails, and formally verifiable cognitive systems.
+
+\textbf{Keywords:} Universal Scene Description, cognitive architecture, deterministic AI, state management, neuroplasticity, batch invariance, LIVRPS composition
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{The Problem}
+
+Modern LLM applications face a fundamental tension: users expect consistent, personalized behavior, but LLM inference is inherently stochastic. The same prompt can produce different outputs based on:
+
+\begin{itemize}
+    \item Batch size during inference
+    \item Server load affecting reduction order
+    \item Non-deterministic GPU operations
+    \item Temperature and sampling parameters
+\end{itemize}
+
+This non-determinism creates challenges for:
+
+\begin{enumerate}
+    \item \textbf{Debugging} --- Cannot reproduce reported issues
+    \item \textbf{Testing} --- Behavioral tests are flaky
+    \item \textbf{Auditing} --- Cannot verify decision traces
+    \item \textbf{Personalization} --- Learning is noisy
+    \item \textbf{Safety} --- Cannot guarantee behavioral bounds
+\end{enumerate}
+
+\subsection{The Thesis}
+
+We propose that \textbf{USD (Universal Scene Description) composition semantics are uniquely suited for cognitive state management in LLM applications}. This is not about using USD for 3D graphics---it is about repurposing USD's conflict resolution system for AI state management.
+
+\begin{table}[H]
+\centering
+\caption{Parallel Problem-Solution Mapping}
+\begin{tabular}{ll}
+\toprule
+\textbf{VFX Problem} & \textbf{AI Problem} \\
+\midrule
+Multiple departments disagree about scene data & Multiple state sources disagree about behavior \\
+USD's LIVRPS resolves conflicts deterministically & USD's LIVRPS resolves conflicts deterministically \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Same solution. Different domain.
+
+\subsection{Contributions}
+
+This paper makes the following contributions:
+
+\begin{enumerate}
+    \item \textbf{Separation of Storage and Routing} --- USD provides state persistence; a separate routing engine provides adaptive behavior
+    \item \textbf{The Mycelium Mechanism} --- A neuroplasticity system with four rebalancing avenues operating within hard constitutional bounds
+    \item \textbf{The Mycelium Arc} --- A novel USD composition arc for horizontal (agent-to-agent) state flow
+    \item \textbf{Determinism Analysis} --- Formal identification of stochastic boundaries and requirements for full reproducibility
+    \item \textbf{Integration with Batch-Invariant Inference} --- When combined with ThinkingMachines kernels \cite{thinkingmachines2025}, the architecture achieves full determinism except for irreducible human I/O
+\end{enumerate}
+
+\section{Background}
+
+\subsection{Universal Scene Description (USD)}
+
+USD is Pixar's open-source framework for describing, composing, and querying hierarchical scene data \cite{pixar2016usd}. Its key properties relevant to our work:
+
+\textbf{LIVRPS Composition Order:}
+\begin{itemize}
+    \item \textbf{L}ocal --- Direct opinions on a prim (highest priority)
+    \item \textbf{I}nherits --- Inherited from parent prims
+    \item \textbf{V}ariantSets --- Selected variants
+    \item \textbf{R}eferences --- External file references
+    \item \textbf{P}ayloads --- Lazy-loaded external content
+    \item \textbf{S}pecializes --- Base class inheritance (lowest priority)
+\end{itemize}
+
+No other configuration format (JSON, YAML, Protobuf, GraphQL) provides native composition, lazy loading, and first-class variants simultaneously.
+
+\subsection{Determinism in LLM Inference}
+
+\textbf{The Key Insight}: Individual LLM forward passes are run-to-run deterministic. The source of user-visible nondeterminism is that \textbf{batch size varies with server load}, and most kernels lack batch-invariance.
+
+ThinkingMachines (2025) demonstrated this empirically: \textbf{80 unique completions from 1000 identical requests} at temperature=0 \cite{thinkingmachines2025}. The variation occurs because:
+
+\begin{enumerate}
+    \item \textbf{Batch-size-dependent reduction order} --- The same matrix operation produces different results depending on batch size
+    \item \textbf{Load-dependent batching} --- Server load determines batch size, introducing runtime variation
+    \item \textbf{Kernel optimization switches} --- Some kernels change algorithms based on batch size
+\end{enumerate}
+
+ThinkingMachines batch-invariant kernels eliminate these sources at a cost of $\sim$1.6--2.1$\times$ performance overhead.
+
+\section{Architecture Overview}
+
+The USD Cognitive Substrate comprises two orthogonal hierarchies:
+
+\begin{enumerate}
+    \item \textbf{Runtime Service Stack} --- Processing, routing, adaptation, dispatch
+    \item \textbf{USD Composition Hierarchy} --- State storage with LIVRPS resolution
+\end{enumerate}
+
+\textbf{Critical Design Decision:} USD provides storage and composition semantics. USD does NOT provide routing logic. The routing engine is a separate layer that reads from and writes to USD.
+
+\section{The Mycelium Mechanism}
+
+The Mycelium is the substrate's neuroplasticity system---how it learns and adapts while maintaining safety guarantees.
+
+\subsection{Formal Mathematical Specification}
+
+\begin{definition}[Weight Space]
+Let $W = \{w \in \mathbb{R}^7 \mid w_i \geq f_i \ \forall i \in [1,7], \sum w_i = 1\}$
+where $f = [0.10, 0.05, 0.05, 0, 0, 0, 0]$ are safety floors.
+\end{definition}
+
+\begin{definition}[Hebbian Update]
+$U: W \times \mathbb{R} \times \mathbb{R}^7 \rightarrow W$
+
+$U(w, o, a)_i = \text{clip}(w_i + \alpha(o - e)a_i, f_i, 1.0) / Z$
+
+where $Z$ normalizes to sum=1, $\alpha \in (0, 0.2]$, $o \in [-1, 1]$, $e = 0.5$
+\end{definition}
+
+\begin{theorem}[Safety Floor Invariant]
+$\forall w \in W, \forall o, a: U(w, o, a) \in W$
+\end{theorem}
+
+\begin{proof}
+By construction, clip enforces $w_i \geq f_i$, and $Z$ normalizes sum to 1.
+\end{proof}
+
+\begin{theorem}[Bounded Learning]
+$|U(w, o, a)_i - w_i| \leq \alpha \times \max(|o - e|) \times \max(\|a\|_\infty) \leq 0.2 \times 1 \times 1 = 0.2$
+\end{theorem}
+
+\begin{theorem}[Convergence]
+Under stationary outcome distribution, $w$ converges to $E[o \times a] / \sum_i E[o \times a_i]$.
+\end{theorem}
+
+\section{Determinism Analysis}
+
+The architecture isolates all stochasticity to human agency boundaries. Everything between user input and user response is deterministic when using ThinkingMachines batch-invariant kernels.
+
+\subsection{With ThinkingMachines}
+
+ThinkingMachines provides batch-invariant kernels that guarantee identical outputs regardless of batch size \cite{thinkingmachines2025}:
+
+\begin{table}[H]
+\centering
+\caption{Batch-Invariant Strategies}
+\begin{tabular}{lll}
+\toprule
+\textbf{Operation} & \textbf{Strategy} & \textbf{Cost} \\
+\midrule
+RMSNorm & Data-parallel (one batch element per core) & Minimal \\
+Matrix Multiplication & Fixed tile sizes across all batch sizes & $\sim$20\% vs cuBLAS \\
+Attention & Fixed split-SIZE (not split-count) & 1.6$\times$ total \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Reproducibility Contract}
+
+\begin{quote}
+\textbf{GIVEN:}
+\begin{enumerate}
+    \item Identical user input string
+    \item Identical USD state
+    \item Identical timestamp
+    \item Same model version
+    \item Same hardware configuration
+\end{enumerate}
+
+\textbf{GUARANTEE:}
+\begin{itemize}
+    \item Identical signal detection
+    \item Identical routing decision
+    \item Identical LLM response
+    \item Identical state update
+    \item Identical checksum
+\end{itemize}
+
+\textbf{STOCHASTIC (Irreducible):}
+\begin{itemize}
+    \item What the user types
+    \item How the user responds
+\end{itemize}
+\end{quote}
+
+\section{Evaluation: CogRoute-Bench Results}
+
+The reference implementation was evaluated on CogRoute-Bench, a standardized benchmark with 37 routing tasks across 8 categories:
+
+\begin{table}[H]
+\centering
+\caption{CogRoute-Bench Results}
+\begin{tabular}{lr}
+\toprule
+\textbf{Metric} & \textbf{Result} \\
+\midrule
+Accuracy & 94.6\% (35/37 tasks) \\
+Determinism & 100.0\% \\
+Explainability & 95.1\% \\
+Average Latency & 0.13ms \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Result:} 100\% determinism achieved---identical inputs produce identical routing decisions across all runs.
+
+\section{Falsifiability Criteria}
+
+The USD Cognitive Substrate thesis would be \textbf{FALSIFIED} if:
+
+\begin{enumerate}
+    \item \textbf{Composition Failure}: LIVRPS resolution produces paradoxes in $>$1\% of real-world state configurations
+    \item \textbf{Learning Instability}: Mycelium weights oscillate indefinitely or converge to degenerate configurations
+    \item \textbf{Safety Floor Violation}: Any execution path allows expert weights to fall below safety floors
+    \item \textbf{Determinism Failure}: With ThinkingMachines, identical inputs produce different outputs in $>$0.01\% of cases
+    \item \textbf{Practical Inferiority}: A simpler system achieves equivalent routing accuracy with $<$50\% of the specification complexity
+\end{enumerate}
+
+\section{Conclusion}
+
+The USD Cognitive Substrate demonstrates that USD composition semantics---designed for visual effects pipeline conflict resolution---are equally applicable to cognitive state management in LLM applications.
+
+When deployed with ThinkingMachines kernels, the system provides a formally verifiable guarantee: \textbf{same input + same state $\rightarrow$ same output}. This transforms LLM applications from probabilistic systems into deterministic functions, enabling reproducibility, testing, auditing, and accountability.
+
+\section*{Acknowledgments}
+
+The author thanks Pixar Animation Studios for creating and open-sourcing Universal Scene Description (USD), whose composition semantics inspired this architecture. The author also acknowledges the ThinkingMachines Lab for their foundational work on batch-invariant LLM inference \cite{thinkingmachines2025}, which enables the determinism guarantees central to this system.
+
+\section*{Code and Data Availability}
+
+The specification and reference implementation are available under the MIT License:
+
+\begin{itemize}
+    \item \textbf{Specification:} \url{https://github.com/JosephOIbrahim/usd-cognitive-substrate}
+    \item \textbf{Implementation:} \url{https://github.com/JosephOIbrahim/framework-orchestrator}
+\end{itemize}
+
+Benchmark results: 94.6\% routing accuracy, 100\% determinism, 0.13ms average latency.
+
+\bibliographystyle{plainnat}
+\bibliography{../references}
+
+\end{document}

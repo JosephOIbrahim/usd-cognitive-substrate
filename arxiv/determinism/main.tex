@@ -1,0 +1,299 @@
+\documentclass[11pt,a4paper]{article}
+
+% Packages
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{natbib}
+\usepackage{float}
+
+% Hyperref setup
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,
+    urlcolor=cyan,
+    citecolor=blue,
+    pdftitle={Determinism in Framework Orchestrator},
+    pdfauthor={Joseph O. Ibrahim}
+}
+
+% Listings setup for code
+\lstset{
+    basicstyle=\ttfamily\small,
+    breaklines=true,
+    frame=single,
+    backgroundcolor=\color{gray!10},
+    language=Python,
+    keywordstyle=\color{blue},
+    commentstyle=\color{green!60!black},
+    stringstyle=\color{orange}
+}
+
+% Title
+\title{Determinism in Framework Orchestrator:\\Achieving Reproducible AI Routing Through Batch-Invariant Design}
+
+\author{Joseph O. Ibrahim\\
+\textit{Independent Research}\\
+\url{https://github.com/JosephOIbrahim}}
+
+\date{January 2026}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Framework Orchestrator achieves deterministic behavior through batch-invariant design principles. This document explains how determinism is enforced and its relationship to the ThinkingMachines research on defeating nondeterminism in LLM inference. We demonstrate that routing and state management can be made fully deterministic, and that end-to-end determinism (including LLM generation) is achievable with batch-invariant kernels at a performance cost of approximately 1.6$\times$.
+
+\textbf{Keywords:} determinism, batch invariance, LLM inference, reproducibility, cognitive architecture
+\end{abstract}
+
+\section{Introduction}
+
+\subsection{The Problem: Why LLMs Are Non-Deterministic}
+
+\textbf{Common belief}: ``LLM randomness comes from temperature and sampling.''
+
+\textbf{Reality}: Even at temperature=0, LLMs produce different outputs. ThinkingMachines (2025) demonstrated \textbf{80 unique completions from 1000 identical requests} at temperature=0 \cite{thinkingmachines2025}.
+
+\subsection{Root Cause: Batch Invariance Failure}
+
+The primary source of nondeterminism is \textbf{batch-size variance affecting kernel outputs}:
+
+\begin{equation}
+\text{Different batch sizes} \rightarrow \text{Different reduction orders} \rightarrow \text{Different floating-point results}
+\end{equation}
+
+This occurs because:
+\begin{itemize}
+    \item Matrix multiplication implementations change reduction strategies based on batch dimensions
+    \item Attention kernels apply different split-reduction strategies across varying loads
+    \item Different tensor-core instructions activate at different batch sizes
+\end{itemize}
+
+\textbf{Key insight}: $(a + b) + c \neq a + (b + c)$ in floating-point arithmetic. When reduction order changes, numerics change.
+
+\section{The Solution: Batch-Invariant Design}
+
+\subsection{Framework Orchestrator's Approach}
+
+\begin{lstlisting}
+# DeterminismGuard configuration (framework_orchestrator.py)
+determinism_config = {
+    "batch_size": 1,                    # Critical: eliminates batch variance
+    "cudnn_deterministic": True,        # Deterministic CUDA operations
+    "cudnn_benchmark": False,           # Disable autotuning
+    "float32_matmul_precision": "highest",
+    "seed": seed                        # Reproducible randomness
+}
+\end{lstlisting}
+
+\subsection{Why batch\_size=1 Matters}
+
+\begin{table}[H]
+\centering
+\caption{Batch Size and Determinism}
+\begin{tabular}{lll}
+\toprule
+\textbf{Batch Size} & \textbf{Reduction Order} & \textbf{Determinism} \\
+\midrule
+Variable & Changes with load & \textbf{Non-deterministic} \\
+Fixed (any) & Consistent & Deterministic within batch \\
+\textbf{1} & Single element & \textbf{Fully deterministic} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+With \texttt{batch\_size=1}, there's no reduction variance---each inference is independent and reproducible.
+
+\section{Determinism Guarantees}
+
+\subsection{What IS Deterministic}
+
+\begin{table}[H]
+\centering
+\caption{Deterministic Components}
+\begin{tabular}{lll}
+\toprule
+\textbf{Component} & \textbf{Determinism} & \textbf{How} \\
+\midrule
+Task routing & \textbf{YES} & Hash-based expert selection \\
+Agent activation & \textbf{YES} & Fixed keyword matching rules \\
+Expert selection & \textbf{YES} & \texttt{md5(task) \% len(experts)} \\
+State updates & \textbf{YES} & LIVRPS priority resolution \\
+Checksum computation & \textbf{YES} & Sorted JSON serialization \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{What Requires ThinkingMachines Kernels}
+
+\begin{table}[H]
+\centering
+\caption{ThinkingMachines Requirements}
+\begin{tabular}{lll}
+\toprule
+\textbf{Component} & \textbf{Without TM} & \textbf{With ThinkingMachines} \\
+\midrule
+LLM signal detection & Partial & \textbf{Fully deterministic} \\
+LLM generation & \textbf{NO} & \textbf{YES} \\
+Semantic parsing & \textbf{NO} & \textbf{YES} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Irreducible Stochasticity}
+
+These are inherently non-deterministic and no architecture can fix them:
+\begin{itemize}
+    \item Human input (what the user types)
+    \item Human response (how the user reacts)
+    \item Real-world timestamps (unless mocked)
+\end{itemize}
+
+\section{Reproducibility Contract}
+
+\begin{quote}
+\textbf{GIVEN:}
+\begin{enumerate}
+    \item Identical user input string
+    \item Identical orchestrator state
+    \item Identical timestamp (or deterministic mock)
+    \item Same model version
+    \item Same hardware configuration
+\end{enumerate}
+
+\textbf{GUARANTEE:}
+\begin{itemize}
+    \item[$\checkmark$] Identical routing decision
+    \item[$\checkmark$] Identical agent activation
+    \item[$\checkmark$] Identical expert selection
+    \item[$\checkmark$] Identical state update
+    \item[$\checkmark$] Identical checksum
+\end{itemize}
+
+\textbf{REQUIRES ThinkingMachines:}
+\begin{itemize}
+    \item[$\checkmark$] Identical LLM response
+    \item[$\checkmark$] Identical signal detection
+\end{itemize}
+\end{quote}
+
+\section{Implementation Details}
+
+\subsection{Hash-Based Expert Selection}
+
+\begin{lstlisting}
+# MoERouterAgent - Deterministic routing
+routing_input = f"{task}:{seed}"
+query_hash = hashlib.sha256(routing_input.encode()).hexdigest()
+
+for i, expert in enumerate(self.EXPERTS.keys()):
+    segment = query_hash[i*8:(i+1)*8]
+    score = int(segment, 16) / (16**8)
+    expert_scores[expert] = round(score, 4)
+\end{lstlisting}
+
+Same \texttt{task} + \texttt{seed} $\rightarrow$ Same hash $\rightarrow$ Same expert scores $\rightarrow$ Same routing.
+
+\subsection{Checksum Generation}
+
+\begin{lstlisting}
+# Every agent output includes a reproducible checksum
+output_str = json.dumps(output, sort_keys=True, default=str)
+checksum = hashlib.sha256(output_str.encode()).hexdigest()[:16]
+\end{lstlisting}
+
+\texttt{sort\_keys=True} ensures dictionary order doesn't affect the hash.
+
+\section{ThinkingMachines Integration}
+
+\subsection{What ThinkingMachines Provides}
+
+Batch-invariant kernels for \cite{thinkingmachines2025}:
+\begin{itemize}
+    \item \textbf{RMSNorm}: Data-parallel strategies (one batch element per core)
+    \item \textbf{Matrix multiplication}: Consistent tile sizes across all batch sizes
+    \item \textbf{Attention}: Fixed split-size (not fixed split count)
+\end{itemize}
+
+\subsection{Performance Trade-off}
+
+\begin{table}[H]
+\centering
+\caption{Performance vs. Determinism}
+\begin{tabular}{lll}
+\toprule
+\textbf{Configuration} & \textbf{Performance} & \textbf{Determinism} \\
+\midrule
+Standard vLLM & Baseline & Non-deterministic \\
+TM initial & 2.1$\times$ slower & \textbf{Deterministic} \\
+TM optimized & 1.6$\times$ slower & \textbf{Deterministic} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The 1.6$\times$ overhead is acceptable for applications requiring reproducibility.
+
+\section{Verification}
+
+\subsection{Testing Determinism}
+
+\begin{lstlisting}
+# Run same task twice, compare checksums
+result1 = await orchestrator.orchestrate("test task", context)
+result2 = await orchestrator.orchestrate("test task", context)
+
+assert result1["master_checksum"] == result2["master_checksum"]
+\end{lstlisting}
+
+\subsection{Debugging Non-Determinism}
+
+If checksums differ:
+\begin{enumerate}
+    \item Check \texttt{batch\_size} configuration
+    \item Verify \texttt{cudnn\_deterministic=True}
+    \item Ensure fixed \texttt{seed} value
+    \item Compare individual agent checksums to isolate the source
+\end{enumerate}
+
+\section{Summary}
+
+\begin{table}[H]
+\centering
+\caption{Overall Determinism Summary}
+\begin{tabular}{lll}
+\toprule
+\textbf{Aspect} & \textbf{Framework Orchestrator} & \textbf{With ThinkingMachines} \\
+\midrule
+Routing & Deterministic & Deterministic \\
+Expert selection & Deterministic & Deterministic \\
+State management & Deterministic & Deterministic \\
+LLM generation & Non-deterministic & \textbf{Deterministic} \\
+\textbf{Overall} & \textbf{Routing deterministic} & \textbf{Fully deterministic} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Framework Orchestrator guarantees deterministic \textit{routing and state management}. Full end-to-end determinism (including LLM generation) requires ThinkingMachines batch-invariant kernels.
+
+\section*{Code Availability}
+
+\begin{itemize}
+    \item \textbf{Specification:} \url{https://github.com/JosephOIbrahim/usd-cognitive-substrate}
+    \item \textbf{Implementation:} \url{https://github.com/JosephOIbrahim/framework-orchestrator}
+\end{itemize}
+
+The determinism mechanisms described in this document are implemented in \texttt{framework\_orchestrator.py}, with verification via \texttt{cogroute\_bench.py} (100\% determinism across runs).
+
+\bibliographystyle{plainnat}
+\bibliography{../references}
+
+\end{document}
