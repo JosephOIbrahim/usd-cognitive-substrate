@@ -143,6 +143,19 @@ For cached knowledge retrieval:
 
 With typical parameters, this suggests a theoretical maximum speedup of $10^{13}$ for direct fact retrieval. Our hypothesis of $>$10$\times$ is extremely conservative.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/figure5-energy.pdf}
+    \caption{Energy Cost Comparison: Transformer vs USD Substrate. For direct
+             fact lookup queries, transformers require $O(L \cdot n^2 d)$ operations
+             ($\sim 10^{13}$ ops), while USD achieves $O(1)$ via path traversal.
+             Relationship queries reduce from $O(L \cdot n^2 d)$ to $O(e)$ (edge count).
+             Knowledge updates require full retraining (hours to days) in transformers
+             but only $O(1)$ opinion insertion in USD. This demonstrates exponential
+             energy savings for persistent state operations.}
+    \label{fig:energy}
+\end{figure}
+
 \section{The Persistent State Hypothesis}
 
 \subsection{Formal Statement}

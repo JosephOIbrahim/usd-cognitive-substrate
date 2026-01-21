@@ -134,6 +134,19 @@ USD is Pixar's open-source framework for describing, composing, and querying hie
 
 No other configuration format (JSON, YAML, Protobuf, GraphQL) provides native composition, lazy loading, and first-class variants simultaneously.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.9\textwidth]{figures/figure2-livrps.pdf}
+    \caption{LIVRPS Composition Resolution Order. When querying for a property
+             (e.g., ``energy''), USD traverses composition arcs in priority order:
+             \textbf{L}ocal (highest priority), \textbf{I}nherits, \textbf{V}ariant Sets,
+             \textbf{R}eferences, \textbf{P}ayloads, and \textbf{S}pecializes (lowest
+             priority). The first layer containing the property wins, with lower-priority
+             values shadowed. This deterministic resolution enables hierarchical state
+             management with predictable override semantics.}
+    \label{fig:livrps}
+\end{figure}
+
 \subsection{Determinism in LLM Inference}
 
 \textbf{The Key Insight}: Individual LLM forward passes are run-to-run deterministic. The source of user-visible nondeterminism is that \textbf{batch size varies with server load}, and most kernels lack batch-invariance.
@@ -158,6 +171,19 @@ The USD Cognitive Substrate comprises two orthogonal hierarchies:
 \end{enumerate}
 
 \textbf{Critical Design Decision:} USD provides storage and composition semantics. USD does NOT provide routing logic. The routing engine is a separate layer that reads from and writes to USD.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.85\textwidth]{figures/figure1-routing-flow.pdf}
+    \caption{Five-Phase Routing Flow. User input flows through five deterministic
+             phases: \textbf{ACTIVATE} (signal detection and pattern matching),
+             \textbf{WEIGHT} (expert weighting), \textbf{BOUND} (safety floor
+             enforcement and constitutional constraints), \textbf{SELECT} (argmax
+             selection with tiebreaking), and \textbf{UPDATE} (Hebbian learning
+             for adaptive weight adjustment). Each phase is batch-invariant and
+             deterministic given the same input state.}
+    \label{fig:routing-flow}
+\end{figure}
 
 \section{The Mycelium Mechanism}
 
@@ -197,6 +223,20 @@ Under stationary outcome distribution, $w$ converges to $E[o \times a] / \sum_i 
 \section{Determinism Analysis}
 
 The architecture isolates all stochasticity to human agency boundaries. Everything between user input and user response is deterministic when using ThinkingMachines batch-invariant kernels.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/figure3-determinism.pdf}
+    \caption{Determinism Boundary in AI-Human Interaction. Human agency
+             (user input and responses) remains inherently stochastic and
+             irreducible. However, by integrating ThinkingMachines'
+             batch-invariant kernels, the entire computational pipeline
+             becomes deterministic: signal detection, 5-phase routing,
+             expert selection, LLM generation, and state updates all guarantee
+             that \textit{Same input + Same state $\rightarrow$ Same output + Same state update}.
+             This determinism enables reproducible AI behavior and true on-policy RL.}
+    \label{fig:determinism}
+\end{figure}
 
 \subsection{With ThinkingMachines}
 
@@ -264,6 +304,19 @@ Average Latency & 0.13ms \\
 \end{table}
 
 \textbf{Key Result:} 100\% determinism achieved---identical inputs produce identical routing decisions across all runs.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{figures/figure4-benchmark.pdf}
+    \caption{CogRoute-Bench Evaluation Results. Overall metrics show 94.6\%
+             accuracy in routing decisions, 100\% determinism (bitwise reproducibility
+             across 1000 trials), and 95.1\% explainability (human-interpretable
+             routing rationale). Category-wise analysis reveals perfect accuracy
+             (100\%) for safety-critical tasks (safety\_critical, recovery,
+             redirection), with 80-83\% accuracy on complex execution tasks.
+             Average routing latency: 0.13ms per decision.}
+    \label{fig:benchmark}
+\end{figure}
 
 \section{Falsifiability Criteria}
 
