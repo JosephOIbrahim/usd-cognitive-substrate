@@ -2,8 +2,9 @@
 
 **A Deterministic Architecture for Adaptive AI State Management**
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18332346.svg)](https://doi.org/10.5281/zenodo.18332346)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![Status](https://img.shields.io/badge/Status-Pre--Publication-blue.svg)]()
+[![ORCID](https://img.shields.io/badge/ORCID-0009--0009--2689--4966-green.svg)](https://orcid.org/0009-0009-2689-4966)
 
 ---
 
@@ -93,15 +94,18 @@ The USD Cognitive Substrate is implemented by **Framework Orchestrator**:
 
 ## Citation
 
+If you use this work, please cite:
+
+> Ibrahim, J. O. (2025). *USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management*. Zenodo. https://doi.org/10.5281/zenodo.18332346
+
 ```bibtex
-@techreport{usd_cognitive_substrate_2026,
-  title={USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management},
-  author={Ibrahim, Joseph O.},
-  year={2026},
-  month={January},
-  institution={Independent Research},
-  url={https://github.com/JosephOIbrahim/usd-cognitive-substrate},
-  note={Pre-publication draft. Reference implementation: https://github.com/JosephOIbrahim/framework-orchestrator}
+@software{ibrahim2025usdcognitive,
+  author       = {Ibrahim, Joseph O.},
+  title        = {{USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management}},
+  year         = {2025},
+  publisher    = {Zenodo},
+  doi          = {10.5281/zenodo.18332346},
+  url          = {https://doi.org/10.5281/zenodo.18332346}
 }
 ```
 
@@ -129,6 +133,8 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ---
 
-**Date**: 2026-01-21
-**Status**: Pre-Publication Draft
+**Date**: 2025-01-21
+**Status**: Published
+**DOI**: [10.5281/zenodo.18332346](https://doi.org/10.5281/zenodo.18332346)
 **Author**: Joseph O. Ibrahim
+**ORCID**: [0009-0009-2689-4966](https://orcid.org/0009-0009-2689-4966)
