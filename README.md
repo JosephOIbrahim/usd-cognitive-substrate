@@ -18,13 +18,23 @@ The architecture achieves **fully deterministic cognitive behavior** from signal
 
 ---
 
+## Theoretical Foundation
+
+This specification implements the **[Persistent State Hypothesis](https://github.com/JosephOIbrahim/persistent-state-hypothesis)**:
+
+> *"The energy problem in current AI architectures is architectural, not fundamental."*
+
+USD Cognitive Substrate is the first implementation testing this hypothesis.
+
+---
+
 ## Documents
 
 | Document | Description |
 |----------|-------------|
 | [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Main specification (~900 lines) |
-| [PERSISTENT_STATE_HYPOTHESIS.md](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |
 | [DETERMINISM.md](DETERMINISM.md) | Determinism analysis |
+| [Persistent State Hypothesis](https://github.com/JosephOIbrahim/persistent-state-hypothesis) | Theoretical foundation (separate repo) |
 
 ---
 
@@ -127,6 +137,7 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Related Work
 
+- **Persistent State Hypothesis** (Theoretical Foundation): https://github.com/JosephOIbrahim/persistent-state-hypothesis
 - **Framework Orchestrator** (Implementation): https://github.com/JosephOIbrahim/framework-orchestrator
 - **Pixar USD**: https://graphics.pixar.com/usd/
 - **ThinkingMachines**: https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/
