@@ -198,7 +198,7 @@ If checksums differ:
 https://github.com/JosephOIbrahim/usd-cognitive-substrate
 
 **Reference Implementation:**
-https://github.com/JosephOIbrahim/framework-orchestrator
+https://github.com/JosephOIbrahim/Orchestra
 
 The determinism mechanisms described in this document are implemented in `framework_orchestrator.py`, with verification via `cogroute_bench.py` (100% determinism across runs).
 

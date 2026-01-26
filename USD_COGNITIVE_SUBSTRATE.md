@@ -223,7 +223,7 @@ def "CognitiveState" {
 
     # Routing weights (the Mycelium)
     float[] expert_weights = [0.15, 0.15, 0.10, 0.10, 0.10, 0.20, 0.20]
-    # [Protector, Decomposer, Restorer, Redirector, Acknowledger, Guide, Executor]
+    # [Validator, Scaffolder, Restorer, Refocuser, Celebrator, Socratic, Direct]
 
     # Safety constraints
     float[] safety_floors = [0.10, 0.05, 0.05, 0.0, 0.0, 0.0, 0.0]
@@ -290,7 +290,7 @@ Five-phase routing with deterministic properties:
 │  ┌────────────────────┐  ┌────────────────────┐  ┌────────────────┐  │
 │  │  Safety Floors     │  │  Homeostatic Norm  │  │  Constitutional│  │
 │  │  max(w, floor)     │─▶│  w / sum(w) = 1.0  │─▶│  Constraints   │  │
-│  │  Protector ≥ 0.10  │  │                    │  │  (inviolable)  │  │
+│  │  Validator ≥ 0.10  │  │                    │  │  (inviolable)  │  │
 │  └────────────────────┘  └────────────────────┘  └────────────────┘  │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
@@ -299,7 +299,7 @@ Five-phase routing with deterministic properties:
 │  PHASE 4: SELECT                                                      │
 │  expert = argmax(bounded_scores)                                      │
 │  Tiebreaker: lower priority index wins                                │
-│  Result: "Decomposer" (expert[1])                                     │
+│  Result: "Scaffolder" (expert[1])                                     │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
@@ -347,17 +347,17 @@ Phase 5: UPDATE (The Mycelium)
 
 ### 5.3 Expert Archetypes
 
-Domain-agnostic expert types:
+Domain-agnostic expert types (ADHD_MoE - first match wins):
 
 | Priority | Expert | Purpose | Safety Floor |
 |----------|--------|---------|--------------|
-| 1 | Protector | Safety-first, empathy | 0.10 (hard) |
-| 2 | Decomposer | Break down complexity | 0.05 (hard) |
-| 3 | Restorer | Recovery facilitation | 0.05 (hard) |
-| 4 | Redirector | Attention management | 0.00 |
-| 5 | Acknowledger | Progress recognition | 0.00 |
-| 6 | Guide | Discovery facilitation | 0.00 |
-| 7 | Executor | Direct task execution | 0.00 |
+| 1 | Validator | Safety-first, empathy, emotional validation | 0.10 (hard) |
+| 2 | Scaffolder | Break down complexity, reduce scope | 0.05 (hard) |
+| 3 | Restorer | Recovery facilitation, energy restoration | 0.05 (hard) |
+| 4 | Refocuser | Attention management, tangent redirect | 0.00 |
+| 5 | Celebrator | Progress recognition, milestone acknowledgment | 0.00 |
+| 6 | Socratic | Discovery facilitation, guided exploration | 0.00 |
+| 7 | Direct | Direct task execution, minimal intervention | 0.00 |
 
 **First match wins.** Safety experts are always checked first regardless of activation strength.
 
@@ -367,10 +367,10 @@ Translates expert recommendations to application-specific interventions:
 
 | Strategy | Behavior | Experts |
 |----------|----------|---------|
-| COORDINATED | All applications respond | Protector |
-| EXCLUSIVE | Foreground application only | Decomposer, Acknowledger, Guide, Executor |
+| COORDINATED | All applications respond | Validator |
+| EXCLUSIVE | Foreground application only | Scaffolder, Celebrator, Socratic, Direct |
 | ENVIRONMENTAL | Background applications | Restorer |
-| CASCADING | Primary + environment | Redirector |
+| CASCADING | Primary + environment | Refocuser |
 
 **Adapter Pattern:** Each application registers an adapter that composes interventions for its modality (text, environment changes, notifications).
 
@@ -452,7 +452,7 @@ Signals spread activation across the expert network:
 
 ```
 Signal: "frustrated"
-Activation: Protector=0.8, Decomposer=0.3, Restorer=0.4, ...
+Activation: Validator=0.8, Scaffolder=0.3, Restorer=0.4, ...
 ```
 
 The spreading function is fixed; learned associations are stored in USD.
@@ -493,10 +493,10 @@ IF energy_spent > energy_recovered for N exchanges:
    → Increase Restorer weight
 
 IF focus_coherence declining:
-   → Increase Redirector weight
+   → Increase Refocuser weight
 
 IF cognitive_load > threshold:
-   → Increase Decomposer weight
+   → Increase Scaffolder weight
 ```
 
 ### 6.3 Bound Enforcement
@@ -542,12 +542,12 @@ Under stationary outcome distribution, w converges to E[o × a] / Σ_i E[o × a_
 **Step 1: Signal Detection**
 ```
 Pattern matching:
-- "stuck" → Decomposer trigger ✓
-- "overwhelmed" → Protector trigger ✓
+- "stuck" → Scaffolder trigger ✓
+- "overwhelmed" → Validator trigger ✓
 
 Activation vector A(task):
-  Protector:    1/8 triggers = 0.125 (but "overwhelmed" strong signal)
-  Decomposer:   1/8 triggers = 0.125 (but "stuck" strong signal)
+  Validator:    1/8 triggers = 0.125 (but "overwhelmed" strong signal)
+  Scaffolder:   1/8 triggers = 0.125 (but "stuck" strong signal)
   [others]:     0/n triggers = 0.000
 ```
 
@@ -569,13 +569,13 @@ Normalized:  [0.55, 0.23, 0.23, 0.00, 0.00, 0.00, 0.00]
 
 **Step 4: Selection (SELECT phase)**
 ```
-Winner: Protector (0.55)
+Winner: Validator (0.55)
 Tiebreaker: N/A (clear winner)
 ```
 
 **Step 5: Response Generation**
 ```
-Expert: Protector
+Expert: Validator
 Response: "I notice you're feeling stuck and overwhelmed. Let's pause
           the architecture decision and address how you're feeling first.
           What's the main source of the overwhelm?"
@@ -584,7 +584,7 @@ Response: "I notice you're feeling stuck and overwhelmed. Let's pause
 **Step 6: Outcome & Learning (UPDATE phase)**
 ```
 User feedback: +0.8 (helpful response)
-Hebbian update: w_protector += 0.1 × (0.8 - 0.5) × 0.8 = +0.024
+Hebbian update: w_validator += 0.1 × (0.8 - 0.5) × 0.8 = +0.024
 New weights: [0.174, 0.15, 0.10, ...] → normalize → [0.18, 0.15, ...]
 ```
 
@@ -777,10 +777,10 @@ The core substrate is neurotype-agnostic and domain-agnostic. Specializations ar
 def "ADHDPayload" {
     # Weight adjustments
     float[] weight_adjustments = [0.0, +0.05, +0.05, +0.03, 0.0, 0.0, -0.03]
-    # Increase Decomposer, Restorer, Redirector; decrease Executor
+    # Increase Scaffolder, Restorer, Refocuser; decrease Direct
 
     # Floor adjustments
-    float decomposer_floor = 0.10  # Raised from 0.05
+    float scaffolder_floor = 0.10  # Raised from 0.05
 
     # Added signals
     string[] additional_signals = [
@@ -798,9 +798,9 @@ def "ADHDPayload" {
 
 | Payload | Adjustments |
 |---------|-------------|
-| ADHD | Higher Decomposer/Restorer floors, time signals, reduced tangent budget |
-| Anxiety | Higher Protector floor, uncertainty signals, slower state transitions |
-| Autism | Higher Executor preference, routine disruption signals, explicit communication |
+| ADHD | Higher Scaffolder/Restorer floors, time signals, reduced tangent budget |
+| Anxiety | Higher Validator floor, uncertainty signals, slower state transitions |
+| Autism | Higher Direct preference, routine disruption signals, explicit communication |
 | VFX Domain | Domain triggers (usd, houdini, render), specialized expertise |
 | WebDev Domain | Domain triggers (react, next, api), specialized expertise |
 
@@ -927,7 +927,7 @@ The reference implementation was evaluated on CogRoute-Bench, a standardized ben
     Average Latency: 0.13ms per routing decision
     Total Tasks:     37
     Correct:         35
-    Failures:        2 (complexity → guide, ambiguous executor)
+    Failures:        2 (complexity → socratic, ambiguous direct)
 
     ═══════════════════════════════════════════════════════════════
 ```
@@ -1059,12 +1059,13 @@ The specification and reference implementation are available under the MIT Licen
 https://github.com/JosephOIbrahim/usd-cognitive-substrate
 
 **Reference Implementation:**
-https://github.com/JosephOIbrahim/framework-orchestrator
+https://github.com/JosephOIbrahim/Orchestra
 
-The reference implementation includes:
-- `framework_orchestrator.py` — 7-agent async orchestration system (78KB, ~2000 LOC)
+The reference implementation (Orchestra v5.0.2) includes:
+- Full cognitive orchestration system with 7 intervention experts
 - `cogroute_bench.py` — CogRoute-Bench standardized benchmark suite
-- Complete test suite with 31 unit tests
+- Complete test suite with 777+ unit tests
+- PyPI package: `pip install cognitive-orchestra`
 
 Benchmark results: 94.6% routing accuracy, 100% determinism, 0.13ms average latency.
 
