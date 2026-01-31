@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="https://img.shields.io/badge/Version-7.0.0-blue?style=for-the-badge" alt="Version 7.0.0"/>
+  <img src="https://img.shields.io/badge/Version-7.1.0-blue?style=for-the-badge" alt="Version 7.1.0"/>
   <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"/>
   <img src="https://img.shields.io/badge/Tests-1047+-brightgreen?style=for-the-badge" alt="1047+ Tests"/>
   <img src="https://img.shields.io/badge/Determinism-100%25-gold?style=for-the-badge" alt="100% Determinism"/>
@@ -91,6 +91,17 @@ We discovered this same problem exists in AI: when safety, emotion, task, and do
 | **BCM Stigmergic Learning** | Trail-based confidence with batch-invariance | Queued updates |
 | **Plasticity Auto-Triggers** | Adaptive learning windows on crash/recovery | State-driven |
 | **Knowledge Prims** | O(1) factual retrieval | 168,000× speedup |
+
+### v7.1.0 Extensions (Cognitive Batch Invariance)
+
+| Feature | Description | ThinkingMachines Compliance |
+|---------|-------------|----------------------------|
+| **Fixed Tile Size** | `COGNITIVE_TILE_SIZE=32` for all memory operations | ✅ Fixed split-size strategy |
+| **Aggregation Strategies** | 5 deterministic strategies with Kahan summation | ✅ Batch-invariant accumulation |
+| **Retrieval Invariance** | Same query → same results regardless of batch | ✅ Fixed reduction order |
+| **Cross-Instance Refs** | supersedes, derivedFrom, contradicts, supports | Graph structure for cognition |
+| **Compression Profiles** | context_injection, persistent_storage, api_transport, archive | Optimized for use case |
+| **Verification Tools** | round_trip_test, determinism_test, batch_invariance_test | Formal verification |
 
 ---
 
@@ -254,7 +265,8 @@ result = grounding.query(
 
 | Document | Description |
 |----------|-------------|
-| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Complete specification (1500+ lines) |
+| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Complete specification (1800+ lines) |
+| [**COGNITIVE_BATCH_INVARIANCE.md**](COGNITIVE_BATCH_INVARIANCE.md) | v7.1.0 batch invariance extension |
 | [**DETERMINISM.md**](DETERMINISM.md) | Determinism analysis and proofs |
 | [**BCM_LEARNING.md**](BCM_LEARNING.md) | BCM stigmergic learning theory |
 | [**PERSISTENT_STATE_HYPOTHESIS.md**](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |

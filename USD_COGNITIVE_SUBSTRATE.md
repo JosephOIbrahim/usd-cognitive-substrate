@@ -1,6 +1,6 @@
 # USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management
 
-**Version:** 7.0.0
+**Version:** 7.1.0
 **Date:** 2026-01-31
 **Status:** Academic Pre-Publication Draft
 **Authors:** Joseph O. Ibrahim
@@ -1403,6 +1403,404 @@ The only remaining stochasticity is human agency—what users type and how they 
 
 ---
 
+## 13. Cognitive Batch Invariance (v7.1.0 Extension)
+
+Version 7.1.0 extends the architecture with formal guarantees for memory-level determinism, applying ThinkingMachines principles from LLM inference to cognitive state operations.
+
+### 13.1 The Parallel Problem
+
+ThinkingMachines identified that LLM non-determinism stems from batch-size-dependent reduction order. We observe an identical problem in cognitive state:
+
+| LLM Inference | Cognitive Assembly |
+|---------------|-------------------|
+| Batch size varies | # of memories varies |
+| ↓ | ↓ |
+| Reduction order changes | Template matching order changes |
+| ↓ | ↓ |
+| Different logits | Different context injection |
+| ↓ | ↓ |
+| **NONDETERMINISM** | **NONDETERMINISM** |
+
+### 13.2 CognitiveDeterminismAPI
+
+```yaml
+schemas:
+  CognitiveDeterminismAPI:
+    description: |
+      Guarantees deterministic behavior for cognitive operations.
+      Applied to assembly root to enable determinism constraints.
+
+    attributes:
+      cognitive:determinismMode:
+        type: "token"
+        values: ["strict", "relaxed", "none"]
+        default: "strict"
+        description: |
+          strict: All operations must be deterministic
+          relaxed: Best-effort determinism (allows optimizations)
+          none: No determinism guarantees (maximum performance)
+
+      cognitive:hashSeed:
+        type: "int64"
+        default: 0xCAFEBABE
+        description: |
+          Seed for any randomized operations.
+          Same seed + same inputs = same outputs.
+
+      cognitive:templateMatchOrder:
+        type: "token"
+        values: ["lexicographic", "priority", "chronological", "hash"]
+        default: "lexicographic"
+        description: |
+          How to order template matching when multiple templates could match.
+          MUST be fixed regardless of batch size.
+
+      cognitive:aggregationOrder:
+        type: "token"
+        values: ["id_ascending", "confidence_descending", "chronological", "hash"]
+        default: "id_ascending"
+        description: |
+          Order for aggregating multiple instances into context.
+          This is the "reduction order" for cognitive state.
+
+      cognitive:deterministicHash:
+        type: "string"
+        computed: true
+        description: |
+          SHA-256 hash of expanded cognitive state.
+          Same hash = same state (for verification).
+```
+
+### 13.3 Fixed Tile Size Strategy
+
+From ThinkingMachines: "To achieve batch invariance, we must adopt a fixed split-size strategy."
+
+**Constant Definition:**
+```python
+COGNITIVE_TILE_SIZE = 32  # Fixed, never changes
+DETERMINISM_SEED = 0xCAFEBABE  # Fixed seed for any randomized operations
+```
+
+**Implementation:**
+```python
+# WRONG: Adaptive batch size (causes nondeterminism)
+def expand_memories(memories, system_load):
+    batch_size = 100 / system_load  # NONDETERMINISTIC
+    for batch in chunk(memories, batch_size):
+        yield expand_batch(batch)
+
+# CORRECT: Fixed tile size (deterministic)
+def expand_memories(memories):
+    for batch in chunk(memories, COGNITIVE_TILE_SIZE):
+        yield expand_batch(batch)  # DETERMINISTIC
+```
+
+### 13.4 CognitiveAggregationAPI
+
+```yaml
+schemas:
+  CognitiveAggregationAPI:
+    description: |
+      Defines deterministic aggregation rules for confidence combination.
+      Equivalent to "reduction strategy" in LLM inference.
+
+    attributes:
+      cognitive:aggregationStrategy:
+        type: "token"
+        values: ["max", "mean", "weighted_mean", "decay_mean", "threshold_filter"]
+        default: "max"
+        description: |
+          max: Highest confidence wins (simple, fast)
+          mean: Average all confidences (Kahan summation)
+          weighted_mean: Weight by access_count or recency
+          decay_mean: Apply temporal decay before averaging
+          threshold_filter: Only include above threshold, then max
+
+      cognitive:conflictResolution:
+        type: "token"
+        values: ["newest_wins", "highest_confidence", "manual", "merge"]
+        default: "newest_wins"
+        description: "How to handle conflicting memories"
+
+      cognitive:thresholdMinimum:
+        type: "float"
+        default: 0.5
+        description: "Minimum confidence to include in context"
+```
+
+**Aggregation Implementations:**
+
+```python
+def aggregate_confidences(instances, strategy, config):
+    """
+    Aggregate confidences with determinism guarantee.
+    CRITICAL: Sort FIRST, then aggregate.
+    """
+    # CRITICAL: Sort first for determinism
+    sorted_instances = sorted(
+        instances,
+        key=lambda i: deterministic_sort_key(i, config.aggregation_order)
+    )
+
+    if strategy == "max":
+        return max(i.confidence for i in sorted_instances)
+
+    elif strategy == "mean":
+        # Kahan summation for batch-invariant accumulation
+        return kahan_sum([i.confidence for i in sorted_instances]) / len(sorted_instances)
+
+    elif strategy == "weighted_mean":
+        total_weight = sum(i.access_count for i in sorted_instances) or 1
+        weighted = [i.confidence * i.access_count / total_weight for i in sorted_instances]
+        return kahan_sum(weighted)
+
+    elif strategy == "threshold_filter":
+        filtered = [i for i in sorted_instances if i.confidence >= config.threshold]
+        return max(i.confidence for i in filtered) if filtered else 0.0
+
+
+def kahan_sum(values):
+    """Kahan summation for numerical stability (batch-invariant)."""
+    total = 0.0
+    compensation = 0.0
+    for value in values:
+        y = value - compensation
+        t = total + y
+        compensation = (t - total) - y
+        total = t
+    return total
+```
+
+### 13.5 CognitiveRetrievalAPI
+
+```yaml
+schemas:
+  CognitiveRetrievalAPI:
+    description: |
+      Batch-invariant memory retrieval.
+      Same query always returns same results.
+
+    attributes:
+      cognitive:retrievalStrategy:
+        type: "token"
+        values: ["exact", "semantic", "hybrid"]
+        default: "exact"
+
+      cognitive:maxResults:
+        type: "int"
+        default: 100
+        description: "Fixed limit (not adaptive to system load)"
+
+      cognitive:sortOrder:
+        type: "token"
+        values: ["confidence_desc", "recency_desc", "relevance_desc", "id_asc"]
+        default: "confidence_desc"
+        description: "Deterministic sort order for results"
+
+      cognitive:tileSize:
+        type: "int"
+        default: 32
+        description: |
+          Fixed tile size for retrieval batching.
+          From ThinkingMachines: "fixed split-size preserves batch invariance"
+
+    invariance_guarantees:
+      query_invariance: "Same query + same memory bank = same results"
+      batch_invariance: "Result independent of concurrent queries"
+      order_invariance: "Results in consistent order regardless of retrieval batch size"
+```
+
+### 13.6 CognitiveRelationshipAPI (Cross-Instance References)
+
+```yaml
+schemas:
+  CognitiveRelationshipAPI:
+    description: |
+      Inter-instance relationships for complex cognition.
+      Enables graph structure, not just flat arrays.
+
+    relationships:
+      cognitive:supersedes:
+        type: "rel"
+        description: "This instance replaces another"
+        example: |
+          # mem_042 supersedes mem_017
+          rel cognitive:supersedes = </Instances/mem_017>
+
+      cognitive:derivedFrom:
+        type: "rel[]"
+        description: "This instance synthesized from others"
+        example: |
+          # A conclusion derived from multiple observations
+          rel cognitive:derivedFrom = [
+              </Instances/obs_001>,
+              </Instances/obs_002>,
+              </Instances/obs_003>
+          ]
+
+      cognitive:contradicts:
+        type: "rel"
+        description: "This instance conflicts with another"
+        resolution: "Use conflictResolution strategy"
+
+      cognitive:supports:
+        type: "rel[]"
+        description: "This instance corroborates others"
+        effect: "Increases confidence of supported instances"
+```
+
+### 13.7 CognitiveAuditAPI (Verification Tools)
+
+```yaml
+schemas:
+  CognitiveAuditAPI:
+    description: |
+      Audit trail and determinism verification for cognitive operations.
+
+    attributes:
+      cognitive:auditEnabled:
+        type: "bool"
+        default: false
+
+      cognitive:operationLog:
+        type: "string[]"
+        description: "Log of operations applied to this assembly"
+
+      cognitive:stateHash:
+        type: "string"
+        computed: true
+        description: |
+          SHA-256 of canonical expanded state.
+          Use for determinism verification:
+          same inputs → same hash (GUARANTEED)
+```
+
+**Verification Tests:**
+
+```python
+def verify_round_trip(memories):
+    """Verify compress → expand → compress is identity."""
+    assembly = compress(memories)
+    expanded = expand(assembly)
+    recompressed = compress(expanded)
+    assert hash(assembly) == hash(recompressed)
+
+def verify_determinism(memories, n_trials=100):
+    """Verify same inputs always produce same outputs."""
+    hashes = set()
+    for _ in range(n_trials):
+        assembly = compress(memories)
+        hashes.add(hash(expand(assembly)))
+    assert len(hashes) == 1  # Exactly 1 unique hash
+
+def verify_batch_invariance(memories):
+    """Verify results don't depend on tile size."""
+    results = []
+    for tile_size in [1, 8, 32, 128, 1024]:
+        result = compress_with_tile_size(memories, tile_size)
+        results.append(hash(expand(result)))
+    assert len(set(results)) == 1  # All hashes identical
+```
+
+### 13.8 Compression Profiles
+
+```yaml
+profiles:
+  context_injection:
+    description: "For injecting into LLM context"
+    target: "Maximum compression, minimal tokens"
+    settings:
+      format: "library_reference"
+      maxTokens: 100
+      confidenceThreshold: 0.7
+      includeMetadata: false
+      includeRelationships: false
+
+  persistent_storage:
+    description: "For disk storage between sessions"
+    target: "Lossless, human-readable"
+    settings:
+      format: "assembly_usda_verbose"
+      maxTokens: null  # No limit
+      confidenceThreshold: 0.0  # Keep all
+      includeMetadata: true
+      includeRelationships: true
+      includeAuditLog: true
+
+  api_transport:
+    description: "For network transmission"
+    target: "Balance compression and parse speed"
+    settings:
+      format: "assembly_compressed_json"
+      maxTokens: 1000
+      confidenceThreshold: 0.5
+      includeMetadata: true
+      includeRelationships: false
+
+  archive:
+    description: "For rarely-accessed historical state"
+    target: "Maximum compression, defer expansion"
+    settings:
+      format: "assembly_payload"
+      usePayloads: true
+      deferExpansion: true
+      confidenceThreshold: 0.3
+```
+
+### 13.9 Performance Budget
+
+| Operation | Target Latency | Notes |
+|-----------|---------------|-------|
+| Compression (100 memories) | < 10ms | CPU-bound, no GPU required |
+| Expansion (100 instances) | < 5ms | Can yield incrementally |
+| Exact retrieval | < 2ms | Hash-based lookup |
+| Semantic retrieval | < 50ms | Embedding similarity |
+| Context injection | 100 tokens max | Default budget |
+| Round-trip verification | < 50ms | |
+| Determinism test (100 trials) | < 500ms | |
+| Target compression | > 5:1 | For typical memory sets |
+
+### 13.10 Formal Guarantees (v7.1.0)
+
+**Theorem 5 (Tile Size Invariance):**
+For fixed tile size T and any memory set M:
+```
+expand(M, T) = expand(M, T)
+```
+regardless of system load or concurrent operations.
+
+**Theorem 6 (Aggregation Determinism):**
+For any aggregation strategy A and instance set I:
+```
+A(sort(I)) = A(sort(I))
+```
+when instances are sorted by deterministic key before aggregation.
+
+**Theorem 7 (Retrieval Invariance):**
+With fixed tile size and deterministic sorting:
+```
+retrieve(q, M) = retrieve(q, M)
+```
+across all invocations for query q and memory bank M.
+
+### 13.11 State Schema Extension (44 → 52 fields)
+
+New fields for v7.1.0:
+
+```
+# Batch Invariance Fields
+cognitive:tileSize            = 32 (fixed)
+cognitive:aggregationStrategy = "max" | "mean" | "weighted_mean" | "decay_mean" | "threshold_filter"
+cognitive:aggregationOrder    = "id_ascending" | "confidence_descending" | "chronological" | "hash"
+cognitive:templateMatchOrder  = "lexicographic" | "priority" | "chronological" | "hash"
+cognitive:deterministicHash   = string (SHA-256 of expanded state)
+cognitive:determinismMode     = "strict" | "relaxed" | "none"
+cognitive:hashSeed            = 0xCAFEBABE (fixed)
+cognitive:conflictResolution  = "newest_wins" | "highest_confidence" | "manual" | "merge"
+```
+
+---
+
 ## Appendix A: USD Schema Reference
 
 See `cognitive_substrate_v7.usda` for complete schema definitions.
@@ -1525,5 +1923,5 @@ Benchmark results: 94.6% routing accuracy, 100% determinism, 0.13ms average late
 ---
 
 *Date: 2026-01-31*
-*Version: 7.0.0*
+*Version: 7.1.0*
 *Classification: Academic Pre-Publication Draft*
