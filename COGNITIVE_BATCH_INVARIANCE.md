@@ -283,12 +283,12 @@ cognitive_compress --add-determinism-fields --verify
 
 ## Implementation Files
 
-Reference implementation in the gap analysis:
+Reference implementation modules:
 
 ```
-jet_nemotron_cognitive_assembly.py      # Core compression engine
-jet_nemotron_cognitive_assembly.yaml    # USD schema definitions
-jet_nemotron_cognitive_determinism.py   # Batch invariance layer
+cognitive_assembly.py           # Core compression engine
+cognitive_assembly_schema.yaml  # USD schema definitions
+batch_invariance_layer.py       # Batch invariance layer (ThinkingMachines-compliant)
 ```
 
 ---
