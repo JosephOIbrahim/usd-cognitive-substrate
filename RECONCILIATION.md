@@ -1,9 +1,9 @@
 # USD Cognitive Substrate Reconciliation
 
-## Status: ✅ ALIGNED (2026-01-26)
+## Status: ✅ ALIGNED (2026-01-31) — v7.0.0
 
-The USD Cognitive Substrate specification has been updated to match Orchestra naming conventions.
-Both repositories now use identical expert names and are fully compatible.
+The USD Cognitive Substrate specification (v7.0.0) and Orchestra (v7.0.0) are fully aligned.
+Both repositories share identical expert names, routing phases, and v7.0.0 extensions.
 
 ---
 
@@ -33,10 +33,10 @@ These MUST be preserved in any implementation:
 
 | Implementation | Repository | Status |
 |----------------|------------|--------|
-| **USD Cognitive Substrate** | github.com/JosephOIbrahim/usd-cognitive-substrate | Academic spec |
-| **Orchestra** | github.com/JosephOIbrahim/Orchestra | Production (v5.0.2 on PyPI) |
+| **USD Cognitive Substrate** | github.com/JosephOIbrahim/usd-cognitive-substrate | Academic spec (v7.0.0) |
+| **Orchestra** | github.com/JosephOIbrahim/Orchestra | Production (v7.0.0) |
 
-### Compatibility Matrix
+### Compatibility Matrix (v7.0.0)
 
 | Component | GitHub Spec | Orchestra | Compatible? |
 |-----------|-------------|-----------|-------------|
@@ -46,9 +46,15 @@ These MUST be preserved in any implementation:
 | ThinkingMachines Compliance | ✓ | ✓ | **YES** |
 | Expert Names | ✓ | ✓ | **YES** (aligned) |
 | Layer Count | 7 | 14 | **MAPPING AVAILABLE** |
-| Phase Names | ✓ | ✓ | **YES** (aligned) |
+| Phase Names | 8-phase NEXUS | 8-phase NEXUS | **YES** (aligned) |
+| **Grounding Layer (L7.5)** | ✓ | ✓ | **YES** (v7.0.0) |
+| **BCM Stigmergic Learning** | ✓ | ✓ | **YES** (v7.0.0) |
+| **Plasticity Auto-Triggers** | ✓ | ✓ | **YES** (v7.0.0) |
+| **Signal Reliability** | ✓ | ✓ | **YES** (v7.0.0) |
+| **Knowledge Prims** | ✓ | ✓ | **YES** (v7.0.0) |
+| **GROUNDING_MoE (4 experts)** | ✓ | ✓ | **YES** (v7.0.0) |
 
-**Verdict:** Fully compatible. Both use Orchestra naming conventions.
+**Verdict:** Fully compatible. Both at v7.0.0 with all new features aligned.
 
 ---
 
@@ -82,35 +88,35 @@ E7_EXECUTE    // Direct - Direct execution
 
 ---
 
-## Routing Phase Mapping
+## Routing Phase Mapping (v7.0.0)
 
-### GitHub Spec: 5-Phase Routing
-
-```
-P1_ACTIVATE → P2_WEIGHT → P3_BOUND → P4_SELECT → P5_UPDATE
-```
-
-### Orchestra: 6-Phase Routing
+### 8-Phase NEXUS Pipeline (Both Implementations)
 
 ```
-P0_RETRIEVE → P1_DETECT → P2_CASCADE → P3_LOCK → P4_EXECUTE → P5_UPDATE
+P0_RETRIEVE → P0b_CLASSIFY → P0c_GROUND → P1_DETECT → P2_CASCADE → P3_LOCK → P4_EXECUTE → P5_UPDATE → [POST]_FLUSH
 ```
 
 ### Canonical Mapping (ThinkingMachines-Aligned)
 
 ```
-Phase   GitHub          Orchestra       Canonical           Purpose
-─────   ──────────────  ──────────────  ─────────────────   ─────────────────────────
-P0      (not present)   RETRIEVE        P0_RETRIEVE         Knowledge O(1) lookup [OPTIONAL]
-P1      ACTIVATE        DETECT          P1_SIGNAL           Signal pattern matching
-P2      WEIGHT          CASCADE         P2_ROUTE            Expert weight calculation
-P3      BOUND           LOCK            P3_CONSTRAIN        Safety bounds + parameter lock
-P4      SELECT          EXECUTE         P4_DISPATCH         Expert selection + execution
-P5      UPDATE          UPDATE          P5_LEARN            Mycelium weight update
+Phase   Name            Purpose                                     v7.0.0?
+─────   ──────────────  ──────────────────────────────────────────  ───────
+P0      RETRIEVE        Knowledge O(1) lookup (fast path)           v5.0+
+P0b     CLASSIFY        Grounding: LEARN | ACCESS | HYBRID          v7.0.0 NEW
+P0c     GROUND          Oracle query if ACCESS/HYBRID               v7.0.0 NEW
+P1      DETECT          PRISM signal + BCM fingerprinting           Updated
+P2      CASCADE         Safety + ADHD_MoE + GROUNDING_MoE           Updated
+P3      LOCK            Safety floors + parameter + BCM lock        Updated
+P4      EXECUTE         Expert selection + generation               Updated
+P5      UPDATE          Mycelium + BCM queue + plasticity           Updated
+[POST]  FLUSH           Apply queued BCM updates                    v7.0.0 NEW
 ```
 
-**Key Difference:** Orchestra adds Phase 0 (Knowledge Prims retrieval) as a fast-path optimization.
-This is an EXTENSION, not a breaking change. Spec-compliant implementations can skip P0.
+**Key Changes in v7.0.0:**
+- Phases 0b/0c added for grounding layer
+- GROUNDING_MoE (4 experts) added to Phase 2
+- BCM trail updates queued in Phase 5, applied in [POST] FLUSH
+- Plasticity auto-triggers in Phase 5
 
 ---
 
@@ -247,22 +253,69 @@ Both implementations MUST satisfy:
 
 ---
 
+## v7.0.0 New Features (Both Implementations)
+
+### Grounding Layer (L7.5)
+
+```
+ACCESS over LEARN paradigm:
+- OracleRegistry with 4 registered oracles
+- EvidenceWarehouse with provenance tracking
+- Source mode: LEARN | ACCESS | HYBRID
+- 730/730 queries deterministic (100%)
+```
+
+### BCM Stigmergic Learning
+
+```
+Trail-based expert confidence:
+- Queued updates (batch-invariant)
+- BCM saturation (homeostasis)
+- Time decay (2-hour half-life)
+- Metadata only (does NOT affect routing order)
+```
+
+### Plasticity Auto-Triggers
+
+```
+Condition                              Action
+momentum=CRASHED + burnout≥ORANGE  →   Open plasticity (σ=0.5)
+burnout=RED                        →   Open plasticity (σ=0.3)
+converged + stable_exchanges ≥ 3   →   Close plasticity (σ=0.0)
+```
+
+### Signal Reliability Tracking
+
+```
+Fingerprint-outcome correlation:
+- Per-category reliability scores
+- 50-outcome lookback window
+- Metadata only (does NOT affect routing)
+```
+
+---
+
 ## Conclusion
 
-**The USD Cognitive Substrate (GitHub) and Orchestra are fully aligned.**
+**The USD Cognitive Substrate (GitHub) and Orchestra are fully aligned at v7.0.0.**
 
 Both share:
 - LIVRPS composition semantics
 - Mycelium learning algorithm
 - ThinkingMachines [He2025] determinism compliance
-- 7 intervention experts with **identical naming** (Validator, Scaffolder, Restorer, Refocuser, Celebrator, Socratic, Direct)
-- Reference implementation: Orchestra (v5.0.2 on PyPI, 777+ tests)
+- 7 intervention experts + 4 grounding experts
+- 8-phase NEXUS pipeline
+- Grounding Layer with oracle integration
+- BCM stigmergic learning with queued updates
+- Plasticity auto-triggers
+- Signal reliability tracking
+- Reference implementation: Orchestra (v7.0.0, 1047+ tests)
 
 Layer count difference (GitHub: 7, Orchestra: 14) is documented as extension, not incompatibility.
 
 ---
 
-*Document Version: 2.0.0 (Aligned)*
-*Date: 2026-01-26*
+*Document Version: 3.0.0 (v7.0.0 Aligned)*
+*Date: 2026-01-31*
 *Author: Joseph O. Ibrahim + Claude Code*
-*Status: Repositories aligned - GitHub spec uses Orchestra naming*
+*Status: Repositories aligned at v7.0.0 with all new features*

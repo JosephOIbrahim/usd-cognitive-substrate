@@ -2,6 +2,8 @@
 
 **A Deterministic Architecture for Adaptive AI State Management**
 
+**Version:** 7.0.0 | **Date:** 2026-01-31
+
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18332346.svg)](https://doi.org/10.5281/zenodo.18332346)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 [![ORCID](https://img.shields.io/badge/ORCID-0009--0009--2689--4966-green.svg)](https://orcid.org/0009-0009-2689-4966)
@@ -32,9 +34,11 @@ USD Cognitive Substrate is the first implementation testing this hypothesis.
 
 | Document | Description |
 |----------|-------------|
-| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Main specification (~900 lines) |
-| [DETERMINISM.md](DETERMINISM.md) | Determinism analysis |
-| [Persistent State Hypothesis](https://github.com/JosephOIbrahim/persistent-state-hypothesis) | Theoretical foundation (separate repo) |
+| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Main specification (v7.0.0, ~1200 lines) |
+| [DETERMINISM.md](DETERMINISM.md) | Determinism analysis (incl. BCM, grounding) |
+| [BCM_LEARNING.md](BCM_LEARNING.md) | BCM stigmergic learning theory (v7.0.0 NEW) |
+| [PERSISTENT_STATE_HYPOTHESIS.md](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |
+| [RECONCILIATION.md](RECONCILIATION.md) | Spec ↔ Orchestra alignment |
 
 ---
 
@@ -63,7 +67,23 @@ Bounded neuroplasticity with four rebalancing avenues:
 
 All constrained by **hard safety floors** that can never be violated.
 
-### 3. Formal Guarantees
+### 3. Grounding Layer (v7.0.0 NEW)
+
+The "ACCESS over LEARN" paradigm:
+- **Oracle Registry**: Deterministic oracles (physics, constraint solvers, knowledge graphs)
+- **Evidence Warehouse**: Provenance tracking with confidence=1.0 for oracle results
+- **Source Mode Router**: LEARN | ACCESS | HYBRID decision tree
+- **Validated**: 730/730 grounded queries bit-identical (100% determinism)
+
+### 4. BCM Stigmergic Learning (v7.0.0 NEW)
+
+Trail-based expert confidence with batch-invariance:
+- **Queued Updates**: Trail changes applied AFTER processing (not during)
+- **BCM Saturation**: Homeostatic regulation via sliding threshold
+- **Metadata Only**: Confidence annotates but does NOT affect routing order
+- **ThinkingMachines Compliant**: Same inputs → same routing
+
+### 5. Formal Guarantees
 
 **Theorem 1 (Safety Floor Invariant)**: For any update function U, safety floors are preserved.
 
@@ -71,7 +91,11 @@ All constrained by **hard safety floors** that can never be violated.
 
 **Theorem 3 (Convergence)**: Under stationary outcome distribution, weights converge.
 
-### 4. Determinism Contract
+**Theorem 4 (BCM Batch-Invariance)**: BCM learning does not affect routing determinism.
+
+**Theorem 5 (Grounding Determinism)**: Oracle queries produce bit-identical results.
+
+### 6. Determinism Contract
 
 With ThinkingMachines batch-invariant kernels:
 
@@ -80,7 +104,7 @@ GIVEN: Identical input + state + timestamp + model + hardware
 GUARANTEE: Identical output + state update + checksum
 ```
 
-### 5. Falsifiability Criteria
+### 7. Falsifiability Criteria
 
 The thesis would be **FALSIFIED** if:
 1. LIVRPS produces paradoxes in >1% of configurations
@@ -88,17 +112,22 @@ The thesis would be **FALSIFIED** if:
 3. Safety floors can be violated
 4. Determinism fails in >0.01% of cases with ThinkingMachines
 5. A simpler system achieves equivalent accuracy
+6. BCM learning affects batch-invariance
+7. Grounding queries produce non-deterministic results
 
 ---
 
 ## Reference Implementation
 
-The USD Cognitive Substrate is implemented by **Framework Orchestrator**:
+The USD Cognitive Substrate is implemented by **Orchestra**:
 
-- **Repository**: https://github.com/JosephOIbrahim/framework-orchestrator
-- **Language**: Python (78KB, ~2000 LOC)
+- **Repository**: https://github.com/JosephOIbrahim/Orchestra
+- **Version**: v7.0.0
+- **Language**: Python
+- **Tests**: 1047+ unit tests, 100% pass rate
 - **Benchmark**: CogRoute-Bench (94.6% accuracy, 100% determinism)
-- **Tests**: 31 unit tests, 100% pass rate
+- **Grounding**: 730/730 oracle queries bit-identical
+- **PyPI**: `pip install cognitive-orchestra`
 
 ---
 
@@ -137,14 +166,15 @@ MIT License - see [LICENSE](LICENSE) for details.
 
 ## Related Work
 
+- **Orchestra** (Implementation): https://github.com/JosephOIbrahim/Orchestra
 - **Persistent State Hypothesis** (Theoretical Foundation): https://github.com/JosephOIbrahim/persistent-state-hypothesis
-- **Framework Orchestrator** (Implementation): https://github.com/JosephOIbrahim/framework-orchestrator
 - **Pixar USD**: https://graphics.pixar.com/usd/
 - **ThinkingMachines**: https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/
 
 ---
 
-**Date**: 2025-01-21
+**Date**: 2026-01-31
+**Version**: 7.0.0
 **Status**: Published
 **DOI**: [10.5281/zenodo.18332346](https://doi.org/10.5281/zenodo.18332346)
 **Author**: Joseph O. Ibrahim

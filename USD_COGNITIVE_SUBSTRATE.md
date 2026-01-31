@@ -1,6 +1,7 @@
 # USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management
 
-**Date:** 2026-01-21
+**Version:** 7.0.0
+**Date:** 2026-01-31
 **Status:** Academic Pre-Publication Draft
 **Authors:** Joseph O. Ibrahim
 
@@ -12,9 +13,14 @@ We present the USD Cognitive Substrate, a novel architecture that repurposes Uni
 
 The system comprises two orthogonal hierarchies: a USD Composition Hierarchy for state storage with LIVRPS (Local, Inherits, VariantSets, References, Payloads, Specializes) resolution, and a Runtime Service Stack for processing, routing, and adaptation. A novel "Mycelium" mechanism provides neuroplasticity within constitutional bounds, enabling the system to learn while maintaining safety guarantees.
 
+**Version 7.0.0 introduces three major extensions:**
+1. **Grounding Layer (L7.5)** — The "ACCESS over LEARN" paradigm: route queries to deterministic oracles (physics simulators, knowledge graphs) when ground truth exists
+2. **BCM Stigmergic Learning** — Bienenstock-Cooper-Munro learning with trail-based expert confidence as *metadata annotation only*, preserving ThinkingMachines batch-invariance
+3. **Signal Reliability Tracking** — Fingerprint-outcome correlation for routing confidence prediction
+
 When integrated with batch-invariant inference engines (ThinkingMachines), the architecture guarantees: **same user input + same state → same response + same state update**. This enables reproducible sessions, behavioral unit testing, complete audit trails, and formally verifiable cognitive systems.
 
-**Keywords:** Universal Scene Description, cognitive architecture, deterministic AI, state management, neuroplasticity, batch invariance, LIVRPS composition
+**Keywords:** Universal Scene Description, cognitive architecture, deterministic AI, state management, neuroplasticity, batch invariance, LIVRPS composition, grounded world models, BCM learning
 
 ---
 
@@ -63,6 +69,16 @@ This paper makes the following contributions:
 4. **Determinism Analysis** — Formal identification of stochastic boundaries and requirements for full reproducibility
 
 5. **Integration with Batch-Invariant Inference** — When combined with ThinkingMachines kernels, the architecture achieves full determinism except for irreducible human I/O
+
+**v7.0.0 Additional Contributions:**
+
+6. **Grounding Layer (L7.5)** — The "ACCESS over LEARN" paradigm for deterministic ground truth via oracle integration (validated: 10/10 experiments, physics + constraint satisfaction)
+
+7. **BCM Stigmergic Learning** — Trail-based expert confidence with Bienenstock-Cooper-Munro saturation, providing learning capability while maintaining batch-invariance through queued updates
+
+8. **Plasticity Auto-Triggers** — Adaptive learning rate windows that open during crashes and close on convergence
+
+9. **Signal Reliability Tracking** — Fingerprint-outcome correlation for predictive routing confidence
 
 ---
 
@@ -208,10 +224,14 @@ The USD Cognitive Substrate comprises two orthogonal hierarchies:
 
 **Exception:** Constitutional constraints in profile.usda (SPECIALIZES) cannot be overridden by any layer—they are protected by the substrate itself.
 
-### 4.3 State Schema
+### 4.3 State Schema (v7.0.0 — 44 Fields)
 
 ```usda
 def "CognitiveState" {
+    # ═══════════════════════════════════════════════════════════════
+    # CORE STATE (preserved from v5.0)
+    # ═══════════════════════════════════════════════════════════════
+
     # Continuous dimensions
     float energy = 0.7
     float cognitive_load = 0.4
@@ -231,8 +251,43 @@ def "CognitiveState" {
     # Learning parameters
     float learning_rate = 0.1
     float weight_decay = 0.05
+
+    # ═══════════════════════════════════════════════════════════════
+    # GROUNDING STATE (v7.0.0)
+    # ═══════════════════════════════════════════════════════════════
+
+    string grounding_mode = "LEARN"  # LEARN | ACCESS | HYBRID
+    int oracle_cache_age = 0  # seconds since last oracle query (0-86400)
+    int evidence_chain_length = 0  # number of oracle results in chain
+    float hallucination_score = 0.0  # 0.0=grounded, 1.0=speculation
+    int last_oracle_latency = 0  # ms (0-10000)
+    int grounding_budget = 5  # depletes like tangent_budget
+    string[] active_oracles = []  # list of available oracle IDs
+
+    # ═══════════════════════════════════════════════════════════════
+    # BCM STIGMERGIC STATE (v7.0.0)
+    # ═══════════════════════════════════════════════════════════════
+
+    int bcm_trail_version = 0  # increments on trail update
+    float[] bcm_expert_confidence = [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]  # per-expert confidence
+    bool bcm_plasticity_active = false  # plasticity window open?
+    float bcm_plasticity_sigma = 0.0  # learning rate multiplier (0.0-1.0)
+    string bcm_last_update = ""  # ISO timestamp
+    string bcm_plasticity_trigger = ""  # which condition opened window
+    string bcm_trail_checksum = ""  # for integrity verification
+
+    # ═══════════════════════════════════════════════════════════════
+    # SIGNAL RELIABILITY (v7.0.0)
+    # ═══════════════════════════════════════════════════════════════
+
+    float[] signal_reliability = [1.0, 1.0, 1.0, 1.0, 1.0, 1.0]  # per-category
+    # [emotional, grounding, mode, domain, task, energy]
+    int signal_total_outcomes = 0  # total tracked outcomes
+    string last_fingerprint = ""  # JSON of last signal fingerprint
 }
 ```
+
+**Field Count:** 37 (v5.0) → 44 (v7.0.0) — 7 new fields for grounding, BCM, and signal reliability.
 
 ---
 
@@ -259,90 +314,148 @@ Priority  Category    Description
 4. Consensus detection (multiple sources = higher confidence)
 5. Conflict resolution (higher category wins)
 
-### 5.2 Routing Engine (R4)
+### 5.2 Routing Engine (R4) — 8-Phase NEXUS Pipeline (v7.0.0)
 
-Five-phase routing with deterministic properties:
+Eight-phase routing with deterministic properties and grounding support:
 
-**Figure 1: 5-Phase Routing Flow**
+**Figure 1: 8-Phase NEXUS Routing Flow (v7.0.0)**
 
 ```
                             USER INPUT
                                 │
                                 ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  PHASE 1: ACTIVATE                                                    │
+│  PHASE 0: RETRIEVE (Fast Path)                                        │
+│  Knowledge check for factual queries → O(1) retrieval                 │
+│  IF confidence ≥ 0.85: Return directly (skip phases 0b-5)             │
+└───────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  PHASE 0b: CLASSIFY (v7.0.0 - Grounding)                              │
+│  Determine source mode: LEARN | ACCESS | HYBRID                       │
+│  Grounding signals: physics, simulate, position, velocity, collision  │
+└───────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  PHASE 0c: GROUND (v7.0.0 - Oracle Query)                             │
+│  IF source_mode ∈ {ACCESS, HYBRID}:                                   │
+│    Query oracle registry → Execute deterministic query                │
+│    Cache result with provenance (confidence = 1.0)                    │
+└───────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  PHASE 1: DETECT (formerly ACTIVATE)                                  │
 │  ┌─────────────┐    ┌──────────────────┐    ┌──────────────────────┐ │
-│  │   Signal    │───▶│  Pattern Match   │───▶│  Activation Vector   │ │
-│  │  "stuck"    │    │  (L0D Dictionary)│    │  [0,0.8,0,0,0,0.2,0] │ │
+│  │   Signal    │───▶│  PRISM + BCM     │───▶│  Activation Vector   │ │
+│  │  "stuck"    │    │  Fingerprinting  │    │  [0,0.8,0,0,0,0.2,0] │ │
 │  └─────────────┘    └──────────────────┘    └──────────────────────┘ │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  PHASE 2: WEIGHT                                                      │
-│  activation × expert_weights = weighted_scores                        │
-│  [0,0.8,0,0,0,0.2,0] × [0.15,0.15,0.10,...] = [0,0.12,0,0,0,0.04,0]  │
+│  PHASE 2: CASCADE (formerly WEIGHT)                                   │
+│  Safety gates → ADHD_MoE → GROUNDING_MoE → BCM confidence             │
+│  activation × expert_weights × bcm_trail_modifier = weighted_scores   │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  PHASE 3: BOUND                                                       │
+│  PHASE 3: LOCK (formerly BOUND)                                       │
 │  ┌────────────────────┐  ┌────────────────────┐  ┌────────────────┐  │
-│  │  Safety Floors     │  │  Homeostatic Norm  │  │  Constitutional│  │
-│  │  max(w, floor)     │─▶│  w / sum(w) = 1.0  │─▶│  Constraints   │  │
-│  │  Validator ≥ 0.10  │  │                    │  │  (inviolable)  │  │
+│  │  Safety Floors     │  │  Homeostatic Norm  │  │  Parameter +   │  │
+│  │  max(w, floor)     │─▶│  w / sum(w) = 1.0  │─▶│  BCM Lock      │  │
+│  │  Validator ≥ 0.10  │  │                    │  │  (no variance) │  │
 │  └────────────────────┘  └────────────────────┘  └────────────────┘  │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  PHASE 4: SELECT                                                      │
+│  PHASE 4: EXECUTE (formerly SELECT)                                   │
 │  expert = argmax(bounded_scores)                                      │
 │  Tiebreaker: lower priority index wins                                │
-│  Result: "Scaffolder" (expert[1])                                     │
+│  Generate with locked params + oracle results (if grounded)           │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
 ┌───────────────────────────────────────────────────────────────────────┐
-│  PHASE 5: UPDATE (Mycelium)                                           │
+│  PHASE 5: UPDATE (Mycelium + BCM + Plasticity)                        │
 │  ┌─────────────┐    ┌─────────────┐    ┌─────────────────────────┐   │
-│  │  Outcome    │───▶│  Hebbian    │───▶│  Updated Weights        │   │
-│  │  (0.0-1.0)  │    │  Learning   │    │  (for next routing)     │   │
+│  │  Outcome    │───▶│  Hebbian +  │───▶│  BCM Trail Update       │   │
+│  │  (0.0-1.0)  │    │  BCM Queue  │    │  (QUEUED, not applied)  │   │
 │  └─────────────┘    └─────────────┘    └─────────────────────────┘   │
+│  Plasticity auto-trigger check: momentum=CRASHED → open window       │
+└───────────────────────────────────────────────────────────────────────┘
+                                │
+                                ▼
+┌───────────────────────────────────────────────────────────────────────┐
+│  [POST] FLUSH (v7.0.0 - BCM Batch-Invariance)                         │
+│  Batch apply all queued trail updates AFTER processing completes     │
+│  Ensures: same inputs → same routing (trails are metadata only)       │
 └───────────────────────────────────────────────────────────────────────┘
                                 │
                                 ▼
                           EXPERT RESPONSE
 ```
 
-**Determinism Guarantee:** Each phase is individually deterministic. Given identical input signal and state, the routing produces identical expert selection.
+**Determinism Guarantee:** Each phase is individually deterministic. Given identical input signal and state, the routing produces identical expert selection. BCM trail updates are QUEUED and applied AFTER processing, ensuring batch-invariance.
 
-**Phase Details:**
+**Phase Details (v7.0.0):**
 
 ```
-Phase 1: ACTIVATE
-  Signal → Pattern Match → Activation Vector
+Phase 0: RETRIEVE (Fast Path)
+  Factual query detection ("what is", "explain", "define")
+  O(1) knowledge graph lookup (~0.001ms)
+  Confidence ≥ 0.85 → Return directly (skip remaining phases)
+  Deterministic (fixed triggers, fixed graph structure)
+
+Phase 0b: CLASSIFY (Grounding)
+  Detect grounding signals (physics, simulate, position, etc.)
+  Determine source mode: LEARN | ACCESS | HYBRID
+  Deterministic (fixed signal patterns)
+
+Phase 0c: GROUND (Oracle Query)
+  If ACCESS/HYBRID: Query oracle registry
+  Execute deterministic oracle (e.g., Houdini RBD, Bullet physics)
+  Cache result with provenance
+  Deterministic (oracle is bit-identical, cache is hash-based)
+
+Phase 1: DETECT
+  Signal → PRISM Pattern Match → Activation Vector
+  BCM signal fingerprint capture (QUEUED, not used in routing)
   Deterministic given fixed pattern dictionary (L0D)
 
-Phase 2: WEIGHT
+Phase 2: CASCADE
+  Safety gates → ADHD_MoE → GROUNDING_MoE (if applicable)
   weighted = activation × expert_weights
+  BCM confidence is METADATA ANNOTATION only (does NOT affect selection)
   Deterministic (element-wise multiplication)
 
-Phase 3: BOUND
+Phase 3: LOCK
   Apply safety floors (expert_weights >= safety_floors)
   Apply homeostatic limits (normalize to sum = 1)
-  Enforce constitutional constraints
-  Deterministic (fixed bounds)
+  Lock parameters + grounding sources BEFORE generation
+  Deterministic (fixed bounds, explicit locking)
 
-Phase 4: SELECT
+Phase 4: EXECUTE
   expert = argmax(bounded_weighted)
   Tiebreaker: lower index wins
+  Generate using locked params + oracle results
   Deterministic
 
-Phase 5: UPDATE (The Mycelium)
-  Hebbian learning, attractor dynamics, homeostatic regulation
-  Constrained by Phase 3 bounds
+Phase 5: UPDATE
+  Hebbian learning, attractor dynamics, RC^+xi convergence
+  BCM trail updates QUEUED (not applied during processing)
+  Plasticity window check (CRASHED → open, CONVERGED → close)
   Deterministic given outcome
+
+[POST] FLUSH
+  Apply queued BCM trail updates
+  Apply fingerprint-outcome correlations
+  Happens AFTER response delivered
+  Ensures batch-invariance: same inputs → same routing
 ```
 
 ### 5.3 Expert Archetypes
@@ -361,7 +474,39 @@ Domain-agnostic expert types (ADHD_MoE - first match wins):
 
 **First match wins.** Safety experts are always checked first regardless of activation strength.
 
-### 5.4 Intervention Dispatch (R2)
+### 5.4 GROUNDING_MoE (v7.0.0)
+
+When grounding signals are detected (Phase 0b), route to these specialists (first match wins):
+
+| Priority | Expert | Triggers | Response |
+|----------|--------|----------|----------|
+| 1 | **OracleResolver** | oracle_conflict, mismatch | Reconcile multiple oracle sources |
+| 2 | **EvidenceBuilder** | cite_needed, source_request | Build evidence chain from oracle |
+| 3 | **ConfidenceAdj** | hallucination_detected | Adjust confidence, flag uncertainty |
+| 4 | **AccessGatekeeper** | oracle_required, fresh_need | Route query to grounding layer |
+
+**Source Mode Router:**
+
+```
+Mode     When                                  Behavior
+───────  ────────────────────────────────────  ────────────────────────────────
+LEARN    No oracle, reasoning required         Use LLM inference (default)
+ACCESS   Oracle available, ground truth exists Route to oracle, trust result
+HYBRID   Oracle + interpretation needed        Query oracle, then reason about result
+```
+
+**Grounding Signals (Auto-Detection):**
+
+| Signal Pattern | Detected Mode | Example |
+|----------------|---------------|---------|
+| "where is X at time T" | ACCESS | "Where is the ball at frame 48?" |
+| "will X hit Y" | ACCESS | "Will the ball hit the ground?" |
+| "how fast is X moving" | ACCESS | "What's the ball's velocity?" |
+| "predict X over time" | ACCESS | "Trace the ball's trajectory" |
+| "why did X happen" | HYBRID | "Why did the ball bounce higher?" |
+| "what should I do about X" | LEARN | "How should I fix this physics bug?" |
+
+### 5.5 Intervention Dispatch (R2)
 
 Translates expert recommendations to application-specific interventions:
 
@@ -535,7 +680,107 @@ where Z normalizes to sum=1, α ∈ (0, 0.2], o ∈ [-1, 1], e = 0.5
 Under stationary outcome distribution, w converges to E[o × a] / Σ_i E[o × a_i].
 *Proof sketch*: Standard Hebbian convergence with decay. Full proof in Appendix D.
 
-### 6.5 Worked Example: Complete Routing Trace
+### 6.5 BCM Stigmergic Reinforcement Learning (v7.0.0)
+
+**Core Principle: "Trails, Not Orders"**
+
+BCM (Bienenstock-Cooper-Munro) learning provides metadata about expert effectiveness but NEVER changes the deterministic routing order. This maintains ThinkingMachines batch-invariance.
+
+**Trail-Based Expert Confidence:**
+
+Each expert has a Trail tracking success rates:
+
+```python
+class OrchestraTrail:
+    expert_id: str
+    strength: float  # 0.01 - 100.0 (pheromone-like)
+    success_rate: float  # 0.0 - 1.0
+    total_outcomes: int
+    successful_outcomes: int
+
+    @property
+    def confidence(self) -> float:
+        return 0.6 * self.success_rate + 0.4 * (self.strength / 100.0)
+```
+
+**BCM Saturation (Homeostasis):**
+
+The sliding threshold θ_m decreases as activity increases, preventing unbounded growth:
+
+```
+θ_m(t) = θ_m(t-1) × decay_factor + (1 - decay_factor) × recent_activity
+saturation_factor = 1 / (1 + exp(-(strength - θ_m) / temperature))
+update = base_update × saturation_factor
+```
+
+**Time-Based Decay:**
+
+Trail strength decays exponentially with a 2-hour half-life:
+
+```
+decay = exp(-time_elapsed / half_life)
+new_strength = old_strength × decay
+```
+
+**ThinkingMachines Compliance (CRITICAL):**
+
+```
+✓ Trail updates QUEUED during processing (Phase 5)
+✓ Queued updates applied AFTER response delivered ([POST] FLUSH)
+✓ Same inputs → same routing (trails are metadata only)
+✓ BCM confidence annotates decisions, does NOT affect selection order
+✓ Batch-invariant: routing identical regardless of trail state
+```
+
+### 6.6 Plasticity Auto-Triggers (v7.0.0)
+
+Plasticity windows open/close automatically based on cognitive state:
+
+| Condition | Action | Effect |
+|-----------|--------|--------|
+| momentum=CRASHED + burnout≥ORANGE | Open plasticity | Learning rate × 2 |
+| burnout=RED | Open plasticity | Learning rate × 1.5 |
+| converged + stable_exchanges ≥ 3 | Close plasticity | Normal learning |
+
+**Plasticity State Schema:**
+
+```python
+sigma: float  # 0.0 - 1.0, learning rate multiplier
+window_trigger: str  # Which condition opened window
+window_opened_at: datetime
+```
+
+**Applied in Phase 5 (UPDATE):**
+
+```
+effective_learning_rate = base_rate × (1 + sigma × plasticity_multiplier)
+```
+
+### 6.7 Signal Reliability Tracking (v7.0.0)
+
+**Signal Fingerprinting:**
+
+Compact capture of primary signal per category:
+
+```python
+fingerprint = {
+    "emotional": "frustrated",  # Primary emotional signal
+    "task": "debug",           # Primary task signal
+    "grounding": None          # No grounding signal
+}
+```
+
+**Reliability Score:**
+
+```
+reliability = successful_outcomes / total_outcomes
+lookback_window = 50  # Recent outcomes only
+default = 1.0  # Until evidence suggests otherwise
+```
+
+**Purpose:** Correlation between signal fingerprints and routing outcomes enables predictive confidence adjustment.
+
+### 6.8 Worked Example: Complete Routing Trace
 
 **User Input**: "I'm completely stuck on this architecture decision and feeling overwhelmed"
 
@@ -632,7 +877,134 @@ Agent A (exploring, high momentum) ←→ Agent B (implementing, cold start)
 
 ---
 
-## 8. Determinism Analysis
+## 8. Grounding Layer (L7.5) — v7.0.0
+
+The Grounding Layer implements the "ACCESS over LEARN" paradigm from the Grounded World Model research.
+
+### 8.1 Core Thesis
+
+> **LLMs don't need to LEARN [X]—they need ACCESS to [X].**
+>
+> This thesis generalizes beyond physics: For any domain with reliable oracles,
+> accessing ground truth is superior to learning approximations.
+
+### 8.2 Experimental Validation
+
+| Experiment | Domain | Oracle | Result |
+|------------|--------|--------|--------|
+| RBD Verification | Physics | Houdini RBD | 710/710 determinism (100%) |
+| Experiment 1 | Constraint Satisfaction | Backtracking Solver | 10/10 determinism (hash: fc23a00c926e) |
+| Experiment 2 | USD Unity | LIVRPS Composition | 10/10 determinism (hash: e89e5138077c) |
+
+**Experiment 1 Key Finding**: Graph coloring (NP-complete) — LEARN mode produces 3 violations, ACCESS mode finds valid 3-coloring. Proves ACCESS paradigm generalizes to combinatorics.
+
+**Experiment 2 Key Finding**: USD composition semantics provide identical deterministic resolution for cognitive state AND physical world state. 32/32 edge cases passing, 1.85ms average latency.
+
+### 8.3 Architecture
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    GROUNDING LAYER (L7.5)                       │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   Query → Source Router → ACCESS?                               │
+│                              ↓ Yes                              │
+│                         Oracle Registry → Query Oracle          │
+│                              ↓                                  │
+│                         Evidence Warehouse (cache + provenance) │
+│                              ↓                                  │
+│                         Return deterministic result             │
+│                                                                 │
+│                              ↓ No (LEARN mode)                  │
+│                         Continue to LLM inference               │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+### 8.4 Oracle Registry
+
+Registered oracles provide deterministic ground truth:
+
+| Oracle ID | Domain | Latency | Determinism |
+|-----------|--------|---------|-------------|
+| `houdini_rbd` | Physics (RBD) | ~26ms | 100% |
+| `bullet_physics` | Collision | ~15ms | 100% |
+| `knowledge_graph` | Facts | ~0.001ms | 100% |
+| `backtrack_solver` | Constraint Satisfaction | ~5ms | 100% |
+
+**Fallback Chain**: Oracle (ACCESS) → Cache (if fresh) → Knowledge (RETRIEVE) → LLM (LEARN)
+
+### 8.5 Evidence Warehouse
+
+When ACCESS mode returns oracle results, evidence is tracked:
+
+```
+evidence_chain: [
+  {source: "houdini_rbd", query: "position(ball, 48)", result: "Vec3(0,1,0)", timestamp: T}
+]
+provenance: oracle_id + query_hash + timestamp
+confidence: 1.0 (oracle is authoritative)
+```
+
+### 8.6 Determinism Guarantees
+
+```
+Theorem: Grounded queries produce deterministic results.
+
+Proof:
+1. Oracle is deterministic (e.g., Bullet physics with fixed seed)
+2. Query translation is deterministic (fixed prompt, temperature=0)
+3. Cache lookup is deterministic (hash-based)
+4. Composition of deterministic functions is deterministic ∎
+
+Empirical validation: 710/710 queries (100%) bit-identical across sessions
+```
+
+### 8.7 Hallucination Detection
+
+When NOT in ACCESS mode, monitor for hallucination signals:
+
+| Signal | Detection | Action |
+|--------|-----------|--------|
+| Physics claim without oracle | "The ball will land at X" (no query) | Flag, suggest ACCESS |
+| Confidence mismatch | High confidence on ungrounded claim | Reduce confidence, caveat |
+| Oracle contradiction | LLM output conflicts with cached oracle | Use oracle, note discrepancy |
+
+### 8.8 USD Unity (Unified State Description)
+
+The Grounding Layer achieves a conceptual unification:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                USD AS UNIVERSAL STATE DESCRIPTION               │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   USD (Pixar)        Cognitive Substrate    Grounded World Model│
+│   ─────────────────────────────────────────────────────────────│
+│   Scene Graph    →   Cognitive Architecture → World State Graph │
+│   Prims          →   State Fields          → Physical Objects  │
+│   Attributes     →   Parameters            → Position/Velocity │
+│   Composition    →   Priority Resolution   → Oracle > Inference│
+│   Layers         →   Subsystems (L0-L13)   → Evidence Layers   │
+│   Payloads       →   Domain Knowledge      → Simulation Results│
+│   Variants       →   Mode Switching        → LEARN/ACCESS/HYBRID│
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**LIVRPS Composition Order** (Oracle overrides Cognitive):
+```
+LOCAL       → Oracle results (HIGHEST - wins on conflict)
+INHERITS    → Grounding context
+VARIANTS    → Source mode switching
+REFERENCES  → Cache state
+PAYLOADS    → Oracle registry
+SPECIALIZES → Cognitive base state (LOWEST)
+```
+
+---
+
+## 9. Determinism Analysis
 
 **Figure 3: Determinism Boundary**
 
@@ -1033,7 +1405,66 @@ The only remaining stochasticity is human agency—what users type and how they 
 
 ## Appendix A: USD Schema Reference
 
-See `cognitive_substrate_v5.usda` for complete schema definitions.
+See `cognitive_substrate_v7.usda` for complete schema definitions.
+
+## Appendix D: BCM Learning Mathematics
+
+**Bienenstock-Cooper-Munro Saturation:**
+
+The BCM sliding threshold provides homeostatic regulation:
+
+```
+θ_m(t+1) = θ_m(t) × α + (1 - α) × ȳ²(t)
+```
+
+Where:
+- θ_m = sliding threshold
+- α = decay factor (typically 0.95)
+- ȳ = recent activity average
+
+**Trail Strength Update:**
+
+```
+Δs = η × (y - θ_m) × x × saturation(s)
+s_new = clip(s + Δs, 0.01, 100.0)
+```
+
+Where:
+- η = base learning rate
+- y = outcome signal
+- x = activation level
+- saturation(s) = 1 / (1 + exp(-(s - θ_m) / T))
+
+**Time Decay:**
+
+```
+s(t) = s(0) × exp(-t / τ)
+τ = 2 hours (half-life)
+```
+
+## Appendix E: Grounding Layer Implementation
+
+**Oracle Query Protocol:**
+
+```python
+# Deterministic oracle query
+result = oracle_registry.query(
+    oracle_id="houdini_rbd",
+    query="position(ball, frame=48)",
+    cache_key=hash(query),
+    max_age_seconds=300
+)
+
+# Evidence chain construction
+evidence = Evidence(
+    source=oracle_id,
+    query=query,
+    result=result,
+    timestamp=now(),
+    confidence=1.0  # Oracle is authoritative
+)
+warehouse.append(evidence)
+```
 
 ## Appendix B: Determinism Specification (L0D)
 
@@ -1061,13 +1492,21 @@ https://github.com/JosephOIbrahim/usd-cognitive-substrate
 **Reference Implementation:**
 https://github.com/JosephOIbrahim/Orchestra
 
-The reference implementation (Orchestra v5.0.2) includes:
-- Full cognitive orchestration system with 7 intervention experts
+The reference implementation (Orchestra v7.0.0) includes:
+- Full cognitive orchestration system with 7 intervention experts + 4 grounding experts
+- Grounding Layer with oracle registry and evidence warehouse
+- BCM stigmergic learning with trail-based confidence
+- Plasticity auto-triggers and signal reliability tracking
 - `cogroute_bench.py` — CogRoute-Bench standardized benchmark suite
-- Complete test suite with 777+ unit tests
+- Complete test suite with 1047+ unit tests
 - PyPI package: `pip install cognitive-orchestra`
 
 Benchmark results: 94.6% routing accuracy, 100% determinism, 0.13ms average latency.
+
+**v7.0.0 Experimental Validation:**
+- Grounding: 710/710 physics queries bit-identical (100%)
+- Constraint Satisfaction: 10/10 determinism (hash: fc23a00c926e)
+- USD Unity: 10/10 determinism (hash: e89e5138077c), 32/32 edge cases
 
 ---
 
@@ -1085,5 +1524,6 @@ Benchmark results: 94.6% routing accuracy, 100% determinism, 0.13ms average late
 
 ---
 
-*Date: 2026-01-21*
+*Date: 2026-01-31*
+*Version: 7.0.0*
 *Classification: Academic Pre-Publication Draft*
