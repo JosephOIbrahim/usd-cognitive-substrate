@@ -200,9 +200,10 @@ across all invocations for query q and memory bank M.
 
 ## State Schema Extension
 
-New fields (44 → 52):
+New fields (44 → 62):
 
 ```
+# Batch Invariance (8 fields)
 cognitive:tileSize            = 32 (fixed)
 cognitive:aggregationStrategy = "max" | "mean" | "weighted_mean" | "decay_mean" | "threshold_filter"
 cognitive:aggregationOrder    = "id_ascending" | "confidence_descending" | "chronological" | "hash"
@@ -211,6 +212,59 @@ cognitive:deterministicHash   = string (SHA-256)
 cognitive:determinismMode     = "strict" | "relaxed" | "none"
 cognitive:hashSeed            = 0xCAFEBABE
 cognitive:conflictResolution  = "newest_wins" | "highest_confidence" | "manual" | "merge"
+
+# Temporal Coherence (5 fields)
+cognitive:temporalEpoch       = int64 (Unix timestamp)
+cognitive:sessionId           = string
+cognitive:schemaVersion       = "7.1.0"
+cognitive:templateVersion     = string (per-instance)
+cognitive:migrationPath       = string[]
+
+# Session Lifecycle (5 fields)
+cognitive:sessionState        = "initializing" | "active" | "suspending" | "archived"
+cognitive:sessionStartTime    = string (ISO8601)
+cognitive:sessionDuration     = int (seconds)
+cognitive:parentSessionId     = string (optional)
+cognitive:lastCheckpointHash  = string
+```
+
+---
+
+## Additional APIs (Complete Gap Coverage)
+
+### CognitiveTemporalAPI
+Temporal coherence for versioning and reproducibility:
+- `temporalEpoch`: Unix timestamp for grouping
+- `schemaVersion`: Schema version for migration
+- `migrationPath`: Chain of migrations applied
+
+### CognitiveSessionAPI
+Session lifecycle integration:
+- `sessionState`: initializing/active/suspending/archived
+- Lifecycle hooks: on_session_start, on_session_checkpoint, on_session_end
+
+### CognitiveCompositionAPI
+Full USD composition support:
+- **inherits**: Profile inheritance chains
+- **payloads**: Deferred loading for large banks
+- **variants**: Energy-dependent pattern routing
+- **specializes**: Pattern specialization
+
+### Claude Code MCP Tools
+```
+cognitive_compress  → Compress flat memories to assembly
+cognitive_expand    → Expand assembly to flat memories
+cognitive_verify    → Verify determinism guarantees
+cognitive_query     → Query memory bank (batch-invariant)
+```
+
+### Migration Path
+```bash
+# v6 → v7.1: Full migration with verification
+cognitive_compress --migrate-from=v6 --verify
+
+# v7.0 → v7.1: Add determinism fields
+cognitive_compress --add-determinism-fields --verify
 ```
 
 ---
@@ -246,6 +300,29 @@ The extension would be **FALSIFIED** if:
 1. **Tile Size Variance**: Different tile sizes produce different results
 2. **Aggregation Non-Determinism**: Same instances produce different aggregated confidence
 3. **Retrieval Variance**: Same query on same bank produces different results
+4. **Temporal Incoherence**: Same session produces different temporal ordering
+5. **Migration Data Loss**: v6→v7.1 migration loses memory content
+
+---
+
+## Gap Analysis Coverage
+
+| # | Gap | Status |
+|---|-----|--------|
+| 1 | Determinism Framework | ✅ Complete |
+| 2 | USD Composition Features | ✅ Complete |
+| 3 | Temporal Coherence | ✅ Complete |
+| 4 | Confidence Aggregation | ✅ Complete |
+| 5 | Retrieval Invariance | ✅ Complete |
+| 6 | Debugging & Audit | ✅ Complete |
+| 7 | Session Integration | ✅ Complete |
+| 8 | Cross-Instance Refs | ✅ Complete |
+| 9 | Compression Profiles | ✅ Complete |
+| 10 | Claude Code Integration | ✅ Complete |
+| 11 | Performance Budget | ✅ Complete |
+| 12 | Migration Path | ✅ Complete |
+
+**Coverage: 12/12 gaps (100%)**
 
 **Current Status:** None observed. Batch invariance verified across tile sizes [1, 8, 32, 128, 1024].
 

@@ -1799,6 +1799,419 @@ cognitive:hashSeed            = 0xCAFEBABE (fixed)
 cognitive:conflictResolution  = "newest_wins" | "highest_confidence" | "manual" | "merge"
 ```
 
+### 13.12 CognitiveTemporalAPI (Gap 3)
+
+Temporal coherence for cognitive state versioning and reproducibility.
+
+```yaml
+schemas:
+  CognitiveTemporalAPI:
+    description: |
+      Temporal coherence for cognitive state.
+      Ensures consistent ordering across time and enables reproducibility.
+
+    attributes:
+      cognitive:temporalEpoch:
+        type: "int64"
+        description: "Unix timestamp for temporal grouping"
+
+      cognitive:sessionId:
+        type: "string"
+        description: "Session identifier for grouping related memories"
+
+      cognitive:schemaVersion:
+        type: "string"
+        description: "Schema version for migration support"
+        example: "7.1.0"
+
+      cognitive:templateVersion:
+        type: "string"
+        description: |
+          Version of template at instance creation.
+          If template changes, old instances remain valid.
+          Enables reproducibility of past cognitive states.
+
+      cognitive:migrationPath:
+        type: "string[]"
+        description: "Chain of migrations applied to this state"
+        example: ["v5→v6", "v6→v7", "v7→v7.1"]
+
+    temporal_ordering_rules:
+      same_session:
+        rule: "Memories from same session maintain relative order"
+        implementation: "Sort by (sessionId, instanceId)"
+
+      cross_session:
+        rule: "Sessions ordered by temporalEpoch"
+        implementation: "Sort by (temporalEpoch, sessionId, instanceId)"
+
+      determinism:
+        rule: "Same temporalEpoch + same memories = same order"
+        guarantee: "Batch-invariant temporal sorting"
+```
+
+**State Schema Extension (52 → 57 fields):**
+```
+cognitive:temporalEpoch    = int64 (Unix timestamp)
+cognitive:sessionId        = string
+cognitive:schemaVersion    = "7.1.0"
+cognitive:templateVersion  = string (per-instance)
+cognitive:migrationPath    = string[] (e.g., ["v5→v6", "v6→v7"])
+```
+
+### 13.13 CognitiveSessionAPI (Gap 7)
+
+Session lifecycle integration for cognitive state.
+
+```yaml
+schemas:
+  CognitiveSessionAPI:
+    description: |
+      Session lifecycle integration for cognitive state.
+      Connects to Claude Code's session management.
+
+    attributes:
+      cognitive:sessionState:
+        type: "token"
+        values: ["initializing", "active", "suspending", "archived"]
+
+      cognitive:sessionStartTime:
+        type: "string"
+        format: "ISO8601"
+
+      cognitive:sessionDuration:
+        type: "int"
+        description: "Duration in seconds (for decay calculations)"
+
+      cognitive:parentSessionId:
+        type: "string"
+        optional: true
+        description: "For continued sessions"
+
+    lifecycle_hooks:
+
+      on_session_start:
+        trigger: "New session initiated"
+        actions:
+          - "Parse cognitive state (auto-detect format)"
+          - "Resolve library references"
+          - "Expand to working representation"
+          - "Apply temporal decay to confidences"
+          - "Inject into context (deterministically)"
+        determinism: "GUARANTEED via fixed ordering"
+
+      on_session_checkpoint:
+        trigger: "Periodic or on-demand"
+        actions:
+          - "Capture current state"
+          - "Compress to assembly format"
+          - "Calculate state hash"
+          - "Store checkpoint"
+
+      on_session_end:
+        trigger: "Session closing"
+        actions:
+          - "Collect new memories from conversation"
+          - "Analyze for template opportunities"
+          - "Update instance access counts"
+          - "Compress to assembly format"
+          - "Generate session capture block"
+          - "Persist to storage"
+
+      on_memory_add:
+        trigger: "New memory created"
+        actions:
+          - "Match against existing templates"
+          - "If no match, check template inference threshold"
+          - "Add instance"
+          - "Invalidate state hash cache"
+```
+
+### 13.14 CognitiveCompositionAPI (Gap 2)
+
+Full USD composition support for cognitive state.
+
+```yaml
+schemas:
+  CognitiveCompositionAPI:
+    description: |
+      Enables full USD composition for cognitive state.
+      Supports inheritance chains, deferred loading, and variants.
+
+    composition_patterns:
+
+      # Profile inheritance (ADHD user inherits ADHD patterns)
+      inheritance:
+        usda_example: |
+          def CognitiveProfile "JoeProfile" (
+              inherits = </Profiles/ADHDBase>
+          )
+          {
+              # Inherits all ADHD patterns
+              # Adds user-specific instances
+          }
+
+        rules:
+          - "Inherited templates available to all instances"
+          - "User can override inherited templates (LIVRPS)"
+          - "Confidence inheritance: user overrides base"
+
+      # Deferred loading for large memory banks
+      payload:
+        usda_example: |
+          def CognitiveAssembly "FullHistory" (
+              payload = @./memory_archive.usda@
+          )
+          {
+              # Load on demand, not at composition
+          }
+
+        use_cases:
+          - "Historical memories (rarely accessed)"
+          - "Archived projects"
+          - "Large pattern libraries"
+
+      # Cognitive state variants
+      variants:
+        usda_example: |
+          def CognitiveAssembly "UserState" (
+              variants = {
+                  string energyLevel = "high"
+              }
+              variantSets = ["energyLevel"]
+          )
+          {
+              variantSet "energyLevel" = {
+                  "high" {
+                      rel activePatterns = [</Patterns/creative>, </Patterns/exploration>]
+                  }
+                  "low" {
+                      rel activePatterns = [</Patterns/mechanical>, </Patterns/maintenance>]
+                  }
+                  "depleted" {
+                      rel activePatterns = [</Patterns/rest>, </Patterns/recovery>]
+                  }
+              }
+          }
+
+        applications:
+          - "Energy-dependent pattern routing"
+          - "Context-dependent memory retrieval"
+          - "A/B testing cognitive strategies"
+
+      # Pattern specialization
+      specializes:
+        usda_example: |
+          def CognitiveTemplate "stuck_on_code" (
+              specializes = </Templates/stuck_generic>
+          )
+          {
+              # Inherits stuck_generic pattern
+              # Adds code-specific interventions
+              string cognitive:pattern = "When stuck on {code_type} > {threshold}, apply {code_intervention}"
+          }
+```
+
+### 13.15 Claude Code MCP Integration (Gap 10)
+
+MCP tools and infrastructure integration for Claude Code.
+
+```yaml
+claude_code_integration:
+
+  mcp_tools:
+
+    cognitive_compress:
+      description: "Compress flat memories to assembly"
+      input_schema:
+        memories: "List[Dict[str, Any]]"
+        library_ref: "Optional[str]"
+        profile: "Optional[str]"  # context_injection, persistent_storage, etc.
+      output_schema:
+        assembly: "str"
+        stats:
+          compression_ratio: "float"
+          template_count: "int"
+          instance_count: "int"
+          determinism_hash: "str"
+
+    cognitive_expand:
+      description: "Expand assembly to flat memories"
+      input_schema:
+        assembly: "str"
+        verify_determinism: "bool"
+      output_schema:
+        memories: "List[Dict[str, Any]]"
+        determinism_hash: "str"
+
+    cognitive_verify:
+      description: "Verify determinism guarantees"
+      input_schema:
+        assembly: "str"
+        test_type: "Literal['round_trip', 'batch_invariance', 'temporal_coherence']"
+      output_schema:
+        passed: "bool"
+        details: "Dict[str, Any]"
+
+    cognitive_query:
+      description: "Query memory bank (batch-invariant)"
+      input_schema:
+        assembly: "str"
+        query: "str"
+        strategy: "Literal['exact', 'semantic', 'hybrid']"
+        max_results: "int"
+      output_schema:
+        results: "List[Dict[str, Any]]"
+        determinism_hash: "str"
+
+  file_locations:
+    cognitive_state: "~/.claude/cognitive/state.usda"
+    template_libraries: "~/.claude/cognitive/libraries/"
+    session_checkpoints: "~/.claude/cognitive/checkpoints/"
+    audit_logs: "~/.claude/cognitive/audit/"
+
+  session_hooks:
+
+    CLAUDE_md_integration:
+      description: "Surface cognitive state in CLAUDE.md"
+      format: |
+        ## Cognitive State (v7.1)
+        ```
+        CA:memoryBank@adhd:1.0
+        I:momentum|{momentum}|{confidence}
+        I:energy|{energy}|{confidence}
+        # ... truncated to top 10 by confidence
+        ```
+        Hash: {determinism_hash}
+
+    slash_commands:
+      "/cognitive status": "Show current state summary"
+      "/cognitive expand": "Show fully expanded state"
+      "/cognitive verify": "Run determinism tests"
+      "/cognitive compress": "Force recompression"
+      "/cognitive checkpoint": "Create named checkpoint"
+```
+
+### 13.16 Migration Path (Gap 12)
+
+Migration from v6 (flat memories) to v7.1 (cognitive assembly with batch invariance).
+
+```yaml
+migration:
+
+  v6_to_v7:
+    description: "Migrate flat memory format to cognitive assembly"
+
+    steps:
+      1_detect_format:
+        input: "Existing cognitive state"
+        output: "Format identification (flat, assembly, mixed)"
+
+      2_analyze_patterns:
+        input: "Flat memories"
+        output: "Template candidates with instance counts"
+        threshold: "min 2 instances per template"
+
+      3_compress:
+        input: "Flat memories + templates"
+        output: "CognitiveAssembly"
+        preserve:
+          - "All memory content (lossless)"
+          - "All confidence values"
+          - "All metadata"
+
+      4_verify:
+        input: "Original flat + compressed assembly"
+        output: "Verification report"
+        tests:
+          - "Round-trip equality"
+          - "Determinism (100 trials)"
+          - "Compression ratio"
+
+      5_persist:
+        input: "Verified assembly"
+        output: "Stored state"
+        format: "assembly_usda_verbose"
+
+    rollback:
+      description: "Assembly → flat is always possible (lossless)"
+      command: "cognitive_expand"
+
+    gradual_adoption:
+      phase_1: "Store as assembly, expand on load (safe)"
+      phase_2: "Store and load as assembly (full adoption)"
+      phase_3: "Full assembly pipeline with libraries (optimized)"
+
+  v7_to_v71:
+    description: "Add batch invariance fields to v7.0 assembly"
+
+    steps:
+      1_add_determinism_fields:
+        - "cognitive:determinismMode = 'strict'"
+        - "cognitive:tileSize = 32"
+        - "cognitive:hashSeed = 0xCAFEBABE"
+
+      2_add_temporal_fields:
+        - "cognitive:schemaVersion = '7.1.0'"
+        - "cognitive:temporalEpoch = current_timestamp()"
+        - "cognitive:migrationPath = ['v7→v7.1']"
+
+      3_compute_hashes:
+        - "cognitive:deterministicHash = sha256(expanded_state)"
+
+      4_verify:
+        - "Run batch_invariance_test"
+        - "Run determinism_test"
+
+    backwards_compatible: true
+    rollback: "Remove new fields (no data loss)"
+```
+
+**Migration Commands:**
+```bash
+# Check current format
+cognitive_verify --detect-format
+
+# Migrate v6 → v7.1
+cognitive_compress --migrate-from=v6 --verify
+
+# Migrate v7.0 → v7.1
+cognitive_compress --add-determinism-fields --verify
+
+# Rollback to flat
+cognitive_expand --output-format=flat
+```
+
+### 13.17 State Schema Extension Summary (44 → 62 fields)
+
+**v7.1.0 Complete Field Additions:**
+
+```
+# Batch Invariance (8 fields) - Section 13.11
+cognitive:tileSize            = 32 (fixed)
+cognitive:aggregationStrategy = "max" | "mean" | "weighted_mean" | "decay_mean" | "threshold_filter"
+cognitive:aggregationOrder    = "id_ascending" | "confidence_descending" | "chronological" | "hash"
+cognitive:templateMatchOrder  = "lexicographic" | "priority" | "chronological" | "hash"
+cognitive:deterministicHash   = string (SHA-256)
+cognitive:determinismMode     = "strict" | "relaxed" | "none"
+cognitive:hashSeed            = 0xCAFEBABE
+cognitive:conflictResolution  = "newest_wins" | "highest_confidence" | "manual" | "merge"
+
+# Temporal Coherence (5 fields) - Section 13.12
+cognitive:temporalEpoch       = int64 (Unix timestamp)
+cognitive:sessionId           = string
+cognitive:schemaVersion       = "7.1.0"
+cognitive:templateVersion     = string (per-instance)
+cognitive:migrationPath       = string[]
+
+# Session Lifecycle (5 fields) - Section 13.13
+cognitive:sessionState        = "initializing" | "active" | "suspending" | "archived"
+cognitive:sessionStartTime    = string (ISO8601)
+cognitive:sessionDuration     = int (seconds)
+cognitive:parentSessionId     = string (optional)
+cognitive:lastCheckpointHash  = string
+```
+
 ---
 
 ## Appendix A: USD Schema Reference
