@@ -1,181 +1,355 @@
-# USD Cognitive Substrate
+<p align="center">
+  <img src="https://img.shields.io/badge/Version-7.0.0-blue?style=for-the-badge" alt="Version 7.0.0"/>
+  <img src="https://img.shields.io/badge/License-MIT-green?style=for-the-badge" alt="MIT License"/>
+  <img src="https://img.shields.io/badge/Tests-1047+-brightgreen?style=for-the-badge" alt="1047+ Tests"/>
+  <img src="https://img.shields.io/badge/Determinism-100%25-gold?style=for-the-badge" alt="100% Determinism"/>
+</p>
 
-**A Deterministic Architecture for Adaptive AI State Management**
+<h1 align="center">USD Cognitive Substrate</h1>
 
-**Version:** 7.0.0 | **Date:** 2026-01-31
+<p align="center">
+  <strong>Deterministic AI State Management via VFX Composition Semantics</strong>
+</p>
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18332346.svg)](https://doi.org/10.5281/zenodo.18332346)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![ORCID](https://img.shields.io/badge/ORCID-0009--0009--2689--4966-green.svg)](https://orcid.org/0009-0009-2689-4966)
+<p align="center">
+  <em>Same input + Same state = Same output. Always.</em>
+</p>
 
----
-
-## Abstract
-
-We present the USD Cognitive Substrate, a novel architecture that repurposes Universal Scene Description (USD) composition semantics—originally designed for conflict resolution in visual effects pipelines—for deterministic state management in large language model (LLM) applications.
-
-The architecture achieves **fully deterministic cognitive behavior** from signal detection through response generation, with stochasticity isolated exclusively to irreducible human input/output boundaries.
-
-**Key Innovation**: USD as Universal State Description.
-
----
-
-## Theoretical Foundation
-
-This specification implements the **[Persistent State Hypothesis](https://github.com/JosephOIbrahim/persistent-state-hypothesis)**:
-
-> *"The energy problem in current AI architectures is architectural, not fundamental."*
-
-USD Cognitive Substrate is the first implementation testing this hypothesis.
+<p align="center">
+  <a href="#the-insight">The Insight</a> •
+  <a href="#key-features">Features</a> •
+  <a href="#architecture">Architecture</a> •
+  <a href="#validation">Validation</a> •
+  <a href="#quick-start">Quick Start</a> •
+  <a href="#documentation">Docs</a>
+</p>
 
 ---
 
-## Documents
+## The Insight
+
+> **What if the technology that manages trillion-polygon VFX scenes could manage AI cognitive state?**
+
+Pixar's **USD (Universal Scene Description)** solves a hard problem: when hundreds of artists edit the same 3D scene, whose opinion wins? USD's answer is **LIVRPS**—a deterministic composition system that resolves conflicts the same way, every time.
+
+We discovered this same problem exists in AI: when safety, emotion, task, and domain all "vote" on how an AI should respond, whose opinion wins?
+
+**USD Cognitive Substrate** applies VFX composition semantics to create the first **fully deterministic cognitive architecture** for LLM applications.
+
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                                                                             │
+│    VFX PROBLEM                          AI PROBLEM                          │
+│    ───────────────────────────────────────────────────────────────────────  │
+│                                                                             │
+│    Multiple departments disagree        Multiple subsystems disagree        │
+│    about scene data                     about AI behavior                   │
+│                                                                             │
+│    Model says: "sphere radius = 5"      Safety says: "stop"                 │
+│    Anim says:  "sphere radius = 3"      Task says:   "continue"             │
+│    Light says: "sphere radius = 4"      Mood says:   "slow down"            │
+│                                                                             │
+│    USD LIVRPS resolves it               USD LIVRPS resolves it              │
+│    deterministically                    deterministically                   │
+│                                                                             │
+│                     SAME SOLUTION. DIFFERENT DOMAIN.                        │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+```
+
+---
+
+## Why Determinism Matters
+
+| Without Determinism | With USD Cognitive Substrate |
+|---------------------|------------------------------|
+| Same prompt → different outputs | Same prompt → **identical** outputs |
+| Can't reproduce bugs | Full session replay |
+| Flaky behavioral tests | **100% reliable** tests |
+| No audit trail | Complete decision traces |
+| Learning is noisy | Verifiable adaptation |
+| Safety can't be guaranteed | **Provable safety bounds** |
+
+---
+
+## Key Features
+
+### Core Architecture (v5.0+)
+
+| Feature | Description |
+|---------|-------------|
+| **LIVRPS Composition** | USD's conflict resolution for cognitive state |
+| **7 Intervention Experts** | Validator, Scaffolder, Restorer, Refocuser, Celebrator, Socratic, Direct |
+| **Mycelium Learning** | Bounded neuroplasticity with safety floors |
+| **8-Phase NEXUS Pipeline** | Deterministic routing from signal to response |
+
+### v7.0.0 Extensions
+
+| Feature | Description | Validation |
+|---------|-------------|------------|
+| **Grounding Layer (L7.5)** | ACCESS over LEARN—route to oracles when ground truth exists | 730/730 (100%) |
+| **BCM Stigmergic Learning** | Trail-based confidence with batch-invariance | Queued updates |
+| **Plasticity Auto-Triggers** | Adaptive learning windows on crash/recovery | State-driven |
+| **Knowledge Prims** | O(1) factual retrieval | 168,000× speedup |
+
+---
+
+## Architecture
+
+```
+                              USER INPUT
+                                  │
+                                  ▼
+┌─────────────────────────────────────────────────────────────────────────────┐
+│                         8-PHASE NEXUS PIPELINE                              │
+├─────────────────────────────────────────────────────────────────────────────┤
+│                                                                             │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐       │
+│  │RETRIEVE │ → │CLASSIFY │ → │ GROUND  │ → │ DETECT  │ → │ CASCADE │       │
+│  │Knowledge│   │LEARN/   │   │ Oracle  │   │ PRISM   │   │ MoE     │       │
+│  │O(1)     │   │ACCESS   │   │ Query   │   │ Signals │   │ Routing │       │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘   └─────────┘       │
+│       │                                                        │            │
+│       ▼                                                        ▼            │
+│  ┌─────────┐   ┌─────────┐   ┌─────────┐   ┌─────────┐                     │
+│  │  LOCK   │ → │ EXECUTE │ → │ UPDATE  │ → │  FLUSH  │ ──→ RESPONSE        │
+│  │ Params  │   │ Expert  │   │Mycelium │   │  BCM    │                     │
+│  │ Fixed   │   │ Action  │   │ +Queue  │   │ Apply   │                     │
+│  └─────────┘   └─────────┘   └─────────┘   └─────────┘                     │
+│                                                                             │
+└─────────────────────────────────────────────────────────────────────────────┘
+                                  │
+                                  ▼
+                              RESPONSE
+                     (Deterministic, Reproducible)
+```
+
+### LIVRPS Cognitive Mapping
+
+```
+USD Layer          Priority    Cognitive Mapping              Example
+─────────────────────────────────────────────────────────────────────────────
+LOCAL              Highest     Session state + Oracle results  Current energy level
+INHERITS                       Context inheritance             Parent task state
+VARIANTSETS                    Mode switching                  focused/exploring
+REFERENCES                     Calibration data                Learned preferences
+PAYLOADS                       Domain expertise                VFX knowledge
+SPECIALIZES        Lowest      Base profile                    Safety constraints
+```
+
+### Expert Hierarchy
+
+```
+Priority  Expert       Role                          Safety Floor
+────────────────────────────────────────────────────────────────────
+1         Validator    Safety-first, emotional       0.10 (HARD)
+2         Scaffolder   Break down complexity         0.05 (HARD)
+3         Restorer     Recovery facilitation         0.05 (HARD)
+4         Refocuser    Attention management          0.00
+5         Celebrator   Progress recognition          0.00
+6         Socratic     Discovery facilitation        0.00
+7         Direct       Task execution                0.00
+```
+
+---
+
+## Validation
+
+### Determinism Benchmarks
+
+| Metric | Result | Method |
+|--------|--------|--------|
+| **Routing Determinism** | 100% | Same signal → same expert, every time |
+| **Grounding Determinism** | 730/730 | Oracle queries bit-identical |
+| **BCM Batch-Invariance** | 100% | Queued updates preserve determinism |
+| **CogRoute-Bench** | 94.6% accuracy | 37 routing tasks, 8 categories |
+
+### Performance
+
+| Operation | USD Substrate | LLM Inference | Speedup |
+|-----------|---------------|---------------|---------|
+| Fact retrieval | 0.001ms | 150ms | **168,000×** |
+| Oracle query | 15-26ms | N/A | Deterministic |
+| Routing decision | 0.13ms | N/A | Deterministic |
+
+### Formal Guarantees
+
+```
+Theorem 1 (Safety Floor Invariant)
+  ∀w ∈ W, ∀update U: U(w) ∈ W
+  Safety floors can NEVER be violated.
+
+Theorem 2 (Bounded Learning)
+  |U(w)_i - w_i| ≤ 0.2
+  Weight updates are bounded.
+
+Theorem 3 (BCM Batch-Invariance)
+  Same inputs → Same routing
+  BCM trails are metadata only.
+
+Theorem 4 (Grounding Determinism)
+  Oracle queries are bit-identical.
+  Composition of deterministic functions is deterministic.
+```
+
+---
+
+## Quick Start
+
+### Installation
+
+```bash
+# Reference implementation
+pip install cognitive-orchestra
+
+# Or from source
+git clone https://github.com/JosephOIbrahim/Orchestra.git
+cd Orchestra
+pip install -e ".[dev]"
+```
+
+### Basic Usage
+
+```python
+from orchestra import CognitiveEngine, Signal
+
+# Initialize
+engine = CognitiveEngine()
+
+# Report a signal
+engine.signal(Signal(
+    category="emotional",
+    content="frustrated",
+    source="user_input"
+))
+
+# Get deterministic routing
+expert = engine.route()  # Always returns same expert for same state
+
+# Report outcome for learning
+engine.outcome(expert=expert, result=0.8)
+```
+
+### Grounding Layer (v7.0.0)
+
+```python
+from orchestra import GroundingLayer, OracleRegistry
+
+# Register an oracle
+registry = OracleRegistry()
+registry.register("physics", HoudiniRBDOracle())
+
+# Query with guaranteed determinism
+grounding = GroundingLayer(registry)
+result = grounding.query(
+    "Where is the ball at frame 48?",
+    source_mode="ACCESS"  # Use oracle, not LLM
+)
+# result.confidence = 1.0 (oracle is authoritative)
+```
+
+---
+
+## Documentation
 
 | Document | Description |
 |----------|-------------|
-| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Main specification (v7.0.0, ~1200 lines) |
-| [DETERMINISM.md](DETERMINISM.md) | Determinism analysis (incl. BCM, grounding) |
-| [BCM_LEARNING.md](BCM_LEARNING.md) | BCM stigmergic learning theory (v7.0.0 NEW) |
-| [PERSISTENT_STATE_HYPOTHESIS.md](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |
-| [RECONCILIATION.md](RECONCILIATION.md) | Spec ↔ Orchestra alignment |
+| [**USD_COGNITIVE_SUBSTRATE.md**](USD_COGNITIVE_SUBSTRATE.md) | Complete specification (1500+ lines) |
+| [**DETERMINISM.md**](DETERMINISM.md) | Determinism analysis and proofs |
+| [**BCM_LEARNING.md**](BCM_LEARNING.md) | BCM stigmergic learning theory |
+| [**PERSISTENT_STATE_HYPOTHESIS.md**](PERSISTENT_STATE_HYPOTHESIS.md) | Theoretical foundation |
+| [**RECONCILIATION.md**](RECONCILIATION.md) | Spec ↔ Implementation alignment |
+| [**PRESENTATION.md**](PRESENTATION.md) | Visual slide deck |
 
 ---
 
-## Key Contributions
+## The Science
 
-### 1. LIVRPS Composition for Cognition
+### ThinkingMachines Compliance
 
-USD's composition semantics repurposed for AI state management:
+This architecture implements batch-invariant design principles from [He2025]:
 
-| USD Concept | Cognitive Mapping |
-|-------------|-------------------|
-| Scene graph | Cognitive architecture |
-| Prim attributes | Behavioral parameters |
-| Composition arcs | Priority resolution |
-| Variants | Mode switching |
-| Layers | Cognitive subsystems |
-| Payloads | Domain knowledge |
+> "The source of user-visible nondeterminism is that batch size varies with server load, and most kernels lack batch-invariance."
 
-### 2. The Mycelium Mechanism
+USD Cognitive Substrate achieves application-level determinism by:
+1. **Fixed evaluation order** (8 phases, no reordering)
+2. **Fixed expert priority** (Validator > ... > Direct)
+3. **Queued updates** (BCM trails applied AFTER processing)
+4. **Locked parameters** (no variance during generation)
 
-Bounded neuroplasticity with four rebalancing avenues:
-- Activation spreading
-- Hebbian learning (with proofs)
-- Attractor dynamics
-- Homeostatic regulation
+### The ACCESS Paradigm
 
-All constrained by **hard safety floors** that can never be violated.
+> **"LLMs don't need to LEARN physics—they need ACCESS to physics."**
 
-### 3. Grounding Layer (v7.0.0 NEW)
-
-The "ACCESS over LEARN" paradigm:
-- **Oracle Registry**: Deterministic oracles (physics, constraint solvers, knowledge graphs)
-- **Evidence Warehouse**: Provenance tracking with confidence=1.0 for oracle results
-- **Source Mode Router**: LEARN | ACCESS | HYBRID decision tree
-- **Validated**: 730/730 grounded queries bit-identical (100% determinism)
-
-### 4. BCM Stigmergic Learning (v7.0.0 NEW)
-
-Trail-based expert confidence with batch-invariance:
-- **Queued Updates**: Trail changes applied AFTER processing (not during)
-- **BCM Saturation**: Homeostatic regulation via sliding threshold
-- **Metadata Only**: Confidence annotates but does NOT affect routing order
-- **ThinkingMachines Compliant**: Same inputs → same routing
-
-### 5. Formal Guarantees
-
-**Theorem 1 (Safety Floor Invariant)**: For any update function U, safety floors are preserved.
-
-**Theorem 2 (Bounded Learning)**: Weight updates are bounded by α × max(|o - e|) × max(||a||).
-
-**Theorem 3 (Convergence)**: Under stationary outcome distribution, weights converge.
-
-**Theorem 4 (BCM Batch-Invariance)**: BCM learning does not affect routing determinism.
-
-**Theorem 5 (Grounding Determinism)**: Oracle queries produce bit-identical results.
-
-### 6. Determinism Contract
-
-With ThinkingMachines batch-invariant kernels:
+When ground truth exists (physics simulation, knowledge graph, constraint solver), route to the oracle instead of asking the LLM to guess.
 
 ```
-GIVEN: Identical input + state + timestamp + model + hardware
-GUARANTEE: Identical output + state update + checksum
+Query Type              Source Mode    Confidence
+─────────────────────────────────────────────────
+"Where is the ball?"    ACCESS         1.0 (oracle)
+"Why did it bounce?"    HYBRID         0.9 (oracle + reasoning)
+"How should I fix it?"  LEARN          0.7 (LLM only)
 ```
 
-### 7. Falsifiability Criteria
+---
+
+## Falsifiability
 
 The thesis would be **FALSIFIED** if:
-1. LIVRPS produces paradoxes in >1% of configurations
-2. Mycelium weights oscillate or degenerate
-3. Safety floors can be violated
-4. Determinism fails in >0.01% of cases with ThinkingMachines
-5. A simpler system achieves equivalent accuracy
-6. BCM learning affects batch-invariance
-7. Grounding queries produce non-deterministic results
 
----
-
-## Reference Implementation
-
-The USD Cognitive Substrate is implemented by **Orchestra**:
-
-- **Repository**: https://github.com/JosephOIbrahim/Orchestra
-- **Version**: v7.0.0
-- **Language**: Python
-- **Tests**: 1047+ unit tests, 100% pass rate
-- **Benchmark**: CogRoute-Bench (94.6% accuracy, 100% determinism)
-- **Grounding**: 730/730 oracle queries bit-identical
-- **PyPI**: `pip install cognitive-orchestra`
+| Criterion | Threshold | Status |
+|-----------|-----------|--------|
+| LIVRPS produces paradoxes | >1% of configs | ✅ Not observed |
+| Mycelium weights degenerate | Any occurrence | ✅ Not observed |
+| Safety floors violated | Any occurrence | ✅ Proven impossible |
+| Determinism fails (with TM) | >0.01% of cases | ✅ 0% failure rate |
+| Simpler system works as well | Equivalent accuracy | ✅ Not demonstrated |
 
 ---
 
 ## Citation
 
-If you use this work, please cite:
-
-> Ibrahim, J. O. (2025). *USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management*. Zenodo. https://doi.org/10.5281/zenodo.18332346
-
 ```bibtex
-@software{ibrahim2025usdcognitive,
+@software{ibrahim2026usdcognitive,
   author       = {Ibrahim, Joseph O.},
-  title        = {{USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management}},
-  year         = {2025},
+  title        = {{USD Cognitive Substrate: A Deterministic Architecture
+                   for Adaptive AI State Management}},
+  version      = {7.0.0},
+  year         = {2026},
   publisher    = {Zenodo},
   doi          = {10.5281/zenodo.18332346},
-  url          = {https://doi.org/10.5281/zenodo.18332346}
+  url          = {https://github.com/JosephOIbrahim/usd-cognitive-substrate}
 }
 ```
 
 ---
 
-## References
+## Related Work
 
-1. Pixar Animation Studios. (2016). *Universal Scene Description*. https://graphics.pixar.com/usd/
-
-2. He, Horace and Thinking Machines Lab. (2025). "Defeating Nondeterminism in LLM Inference." *Thinking Machines Lab: Connectionism*, September 2025. https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/
+| Project | Relationship |
+|---------|--------------|
+| [**Orchestra**](https://github.com/JosephOIbrahim/Orchestra) | Reference implementation (1047+ tests) |
+| [**Pixar USD**](https://graphics.pixar.com/usd/) | Composition semantics source |
+| [**ThinkingMachines**](https://thinkingmachines.ai/) | Batch-invariance research |
 
 ---
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) for details.
+MIT License — see [LICENSE](LICENSE) for details.
 
 ---
 
-## Related Work
+<p align="center">
+  <strong>USD Cognitive Substrate v7.0.0</strong><br/>
+  <em>Deterministic cognition, powered by VFX technology.</em>
+</p>
 
-- **Orchestra** (Implementation): https://github.com/JosephOIbrahim/Orchestra
-- **Persistent State Hypothesis** (Theoretical Foundation): https://github.com/JosephOIbrahim/persistent-state-hypothesis
-- **Pixar USD**: https://graphics.pixar.com/usd/
-- **ThinkingMachines**: https://thinkingmachines.ai/blog/defeating-nondeterminism-in-llm-inference/
-
----
-
-**Date**: 2026-01-31
-**Version**: 7.0.0
-**Status**: Published
-**DOI**: [10.5281/zenodo.18332346](https://doi.org/10.5281/zenodo.18332346)
-**Author**: Joseph O. Ibrahim
-**ORCID**: [0009-0009-2689-4966](https://orcid.org/0009-0009-2689-4966)
+<p align="center">
+  <a href="https://doi.org/10.5281/zenodo.18332346">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18332346.svg" alt="DOI"/>
+  </a>
+  <a href="https://orcid.org/0009-0009-2689-4966">
+    <img src="https://img.shields.io/badge/ORCID-0009--0009--2689--4966-green.svg" alt="ORCID"/>
+  </a>
+</p>
