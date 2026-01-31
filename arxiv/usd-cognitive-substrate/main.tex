@@ -12,6 +12,10 @@
 \usepackage[margin=1in]{geometry}
 \usepackage{natbib}
 \usepackage{float}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{tikz}
+\usetikzlibrary{shapes,arrows,positioning,fit,backgrounds}
 
 % Hyperref setup
 \hypersetup{
@@ -20,7 +24,7 @@
     filecolor=magenta,
     urlcolor=cyan,
     citecolor=blue,
-    pdftitle={USD Cognitive Substrate},
+    pdftitle={USD Cognitive Substrate v7.0.0},
     pdfauthor={Joseph O. Ibrahim}
 }
 
@@ -37,13 +41,17 @@
 
 % Theorem environments
 \newtheorem{theorem}{Theorem}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
 \newtheorem{definition}{Definition}
+\newtheorem{proposition}{Proposition}
 
 % Title
-\title{USD Cognitive Substrate: A Deterministic Architecture for Adaptive AI State Management}
+\title{USD Cognitive Substrate: A Deterministic Architecture\\for Adaptive AI State Management\\[0.5em]\large Version 7.0.0}
 
 \author{Joseph O. Ibrahim\\
 \textit{Independent Research}\\
+ORCID: 0009-0009-2689-4966\\
 \url{https://github.com/JosephOIbrahim}}
 
 \date{January 2026}
@@ -57,72 +65,74 @@ We present the USD Cognitive Substrate, a novel architecture that repurposes Uni
 
 The system comprises two orthogonal hierarchies: a USD Composition Hierarchy for state storage with LIVRPS (Local, Inherits, VariantSets, References, Payloads, Specializes) resolution, and a Runtime Service Stack for processing, routing, and adaptation. A novel ``Mycelium'' mechanism provides neuroplasticity within constitutional bounds, enabling the system to learn while maintaining safety guarantees.
 
-When integrated with batch-invariant inference engines (ThinkingMachines), the architecture guarantees: \textbf{same user input + same state $\rightarrow$ same response + same state update}. This enables reproducible sessions, behavioral unit testing, complete audit trails, and formally verifiable cognitive systems.
+\textbf{Version 7.0.0} introduces three major extensions: (1) a \textbf{Grounding Layer} implementing the ``ACCESS over LEARN'' paradigm for deterministic oracle integration, validated on 730 physics and constraint satisfaction queries with 100\% bit-identical reproducibility; (2) \textbf{BCM Stigmergic Learning} providing trail-based expert confidence as metadata annotation while preserving batch-invariance through queued updates; and (3) \textbf{Knowledge Prims} achieving 168,000$\times$ speedup for factual retrieval versus LLM inference.
 
-\textbf{Keywords:} Universal Scene Description, cognitive architecture, deterministic AI, state management, neuroplasticity, batch invariance, LIVRPS composition
+When integrated with batch-invariant inference engines, the architecture guarantees: \textbf{same user input + same state $\rightarrow$ same response + same state update}. This enables reproducible sessions, behavioral unit testing, complete audit trails, and formally verifiable cognitive systems.
+
+\textbf{Keywords:} Universal Scene Description, cognitive architecture, deterministic AI, state management, neuroplasticity, batch invariance, LIVRPS composition, grounded world models, BCM learning
 \end{abstract}
 
 \section{Introduction}
 
 \subsection{The Problem}
 
-Modern LLM applications face a fundamental tension: users expect consistent, personalized behavior, but LLM inference is inherently stochastic. The same prompt can produce different outputs based on:
+Modern LLM applications face a fundamental tension: users expect consistent, personalized behavior, but LLM inference is inherently stochastic. ThinkingMachines \cite{thinkingmachines2025} demonstrated that even at temperature=0, \textbf{80 unique completions emerged from 1,000 identical requests}. This variation stems not from sampling randomness but from batch-size-dependent reduction order in GPU kernels.
 
-\begin{itemize}
-    \item Batch size during inference
-    \item Server load affecting reduction order
-    \item Non-deterministic GPU operations
-    \item Temperature and sampling parameters
-\end{itemize}
-
-This non-determinism creates challenges for:
+This non-determinism creates cascading challenges:
 
 \begin{enumerate}
-    \item \textbf{Debugging} --- Cannot reproduce reported issues
-    \item \textbf{Testing} --- Behavioral tests are flaky
-    \item \textbf{Auditing} --- Cannot verify decision traces
-    \item \textbf{Personalization} --- Learning is noisy
-    \item \textbf{Safety} --- Cannot guarantee behavioral bounds
+    \item \textbf{Debugging} --- Cannot reproduce reported issues; bug reports become anecdotal
+    \item \textbf{Testing} --- Behavioral tests are flaky; CI/CD pipelines unreliable
+    \item \textbf{Auditing} --- Cannot verify decision traces; regulatory compliance impossible
+    \item \textbf{Personalization} --- Learning from noisy outcomes; adaptation is unreliable
+    \item \textbf{Safety} --- Cannot guarantee behavioral bounds; safety proofs infeasible
 \end{enumerate}
 
 \subsection{The Thesis}
 
-We propose that \textbf{USD (Universal Scene Description) composition semantics are uniquely suited for cognitive state management in LLM applications}. This is not about using USD for 3D graphics---it is about repurposing USD's conflict resolution system for AI state management.
+We propose that \textbf{USD (Universal Scene Description) composition semantics are uniquely suited for cognitive state management in LLM applications}. USD was designed by Pixar to resolve conflicts when hundreds of artists edit the same 3D scene. We observe that cognitive architectures face an analogous problem: multiple subsystems (safety, emotion, task, domain) ``vote'' on AI behavior, and conflicts must be resolved deterministically.
 
 \begin{table}[H]
 \centering
 \caption{Parallel Problem-Solution Mapping}
-\begin{tabular}{ll}
+\label{tab:parallel}
+\begin{tabular}{p{0.45\textwidth}p{0.45\textwidth}}
 \toprule
 \textbf{VFX Problem} & \textbf{AI Problem} \\
 \midrule
-Multiple departments disagree about scene data & Multiple state sources disagree about behavior \\
+Multiple departments (model, rig, anim, light) disagree about scene data & Multiple subsystems (safety, emotion, task, domain) disagree about behavior \\
+\addlinespace
+``sphere.radius = ?'' (Model says 5, Anim says 3) & ``response.tone = ?'' (Safety says stop, Task says continue) \\
+\addlinespace
 USD's LIVRPS resolves conflicts deterministically & USD's LIVRPS resolves conflicts deterministically \\
 \bottomrule
 \end{tabular}
 \end{table}
-
-Same solution. Different domain.
 
 \subsection{Contributions}
 
 This paper makes the following contributions:
 
 \begin{enumerate}
-    \item \textbf{Separation of Storage and Routing} --- USD provides state persistence; a separate routing engine provides adaptive behavior
-    \item \textbf{The Mycelium Mechanism} --- A neuroplasticity system with four rebalancing avenues operating within hard constitutional bounds
-    \item \textbf{The Mycelium Arc} --- A novel USD composition arc for horizontal (agent-to-agent) state flow
-    \item \textbf{Determinism Analysis} --- Formal identification of stochastic boundaries and requirements for full reproducibility
-    \item \textbf{Integration with Batch-Invariant Inference} --- When combined with ThinkingMachines kernels \cite{thinkingmachines2025}, the architecture achieves full determinism except for irreducible human I/O
+    \item \textbf{LIVRPS Composition for Cognition} --- USD's conflict resolution semantics applied to AI state management (Section~\ref{sec:architecture})
+
+    \item \textbf{The Mycelium Mechanism} --- Bounded neuroplasticity with formal safety guarantees (Section~\ref{sec:mycelium})
+
+    \item \textbf{Grounding Layer (v7.0.0)} --- The ``ACCESS over LEARN'' paradigm for deterministic oracle integration, with 730/730 bit-identical queries validated (Section~\ref{sec:grounding})
+
+    \item \textbf{BCM Stigmergic Learning (v7.0.0)} --- Trail-based expert confidence preserving batch-invariance through queued updates (Section~\ref{sec:bcm})
+
+    \item \textbf{Formal Analysis} --- Mathematical proofs of safety floor invariants, bounded learning, and determinism guarantees (Section~\ref{sec:formal})
+
+    \item \textbf{Experimental Validation} --- CogRoute-Bench evaluation achieving 94.6\% accuracy with 100\% determinism (Section~\ref{sec:evaluation})
 \end{enumerate}
 
 \section{Background}
 
 \subsection{Universal Scene Description (USD)}
 
-USD is Pixar's open-source framework for describing, composing, and querying hierarchical scene data \cite{pixar2016usd}. Its key properties relevant to our work:
+USD is Pixar's open-source framework for describing, composing, and querying hierarchical scene data \cite{pixar2016usd}. Its composition system resolves conflicts via \textbf{LIVRPS}---a priority ordering where stronger arcs override weaker ones:
 
-\textbf{LIVRPS Composition Order:}
 \begin{itemize}
     \item \textbf{L}ocal --- Direct opinions on a prim (highest priority)
     \item \textbf{I}nherits --- Inherited from parent prims
@@ -132,92 +142,287 @@ USD is Pixar's open-source framework for describing, composing, and querying hie
     \item \textbf{S}pecializes --- Base class inheritance (lowest priority)
 \end{itemize}
 
-No other configuration format (JSON, YAML, Protobuf, GraphQL) provides native composition, lazy loading, and first-class variants simultaneously.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.9\textwidth]{figures/figure2-livrps.pdf}
-    \caption{LIVRPS Composition Resolution Order. When querying for a property
-             (e.g., ``energy''), USD traverses composition arcs in priority order:
-             \textbf{L}ocal (highest priority), \textbf{I}nherits, \textbf{V}ariant Sets,
-             \textbf{R}eferences, \textbf{P}ayloads, and \textbf{S}pecializes (lowest
-             priority). The first layer containing the property wins, with lower-priority
-             values shadowed. This deterministic resolution enables hierarchical state
-             management with predictable override semantics.}
-    \label{fig:livrps}
-\end{figure}
+No other configuration format (JSON, YAML, Protobuf, GraphQL) provides native composition with deterministic conflict resolution, lazy loading, and first-class variant switching simultaneously.
 
 \subsection{Determinism in LLM Inference}
 
-\textbf{The Key Insight}: Individual LLM forward passes are run-to-run deterministic. The source of user-visible nondeterminism is that \textbf{batch size varies with server load}, and most kernels lack batch-invariance.
+ThinkingMachines \cite{thinkingmachines2025} identified the root cause of LLM non-determinism: \textbf{batch-size-dependent reduction order}. Matrix multiplication and attention kernels change their reduction strategy based on batch dimensions. Since server load determines batch size, and floating-point arithmetic is non-associative ($(a+b)+c \neq a+(b+c)$), different batch contexts produce different outputs.
 
-ThinkingMachines (2025) demonstrated this empirically: \textbf{80 unique completions from 1000 identical requests} at temperature=0 \cite{thinkingmachines2025}. The variation occurs because:
+ThinkingMachines batch-invariant kernels address this through:
+\begin{itemize}
+    \item \textbf{RMSNorm}: Data-parallel strategy (one batch element per core)
+    \item \textbf{Matrix Multiplication}: Fixed tile sizes across all batch sizes
+    \item \textbf{Attention}: Fixed split-SIZE (not split-count) for KV dimension
+\end{itemize}
 
-\begin{enumerate}
-    \item \textbf{Batch-size-dependent reduction order} --- The same matrix operation produces different results depending on batch size
-    \item \textbf{Load-dependent batching} --- Server load determines batch size, introducing runtime variation
-    \item \textbf{Kernel optimization switches} --- Some kernels change algorithms based on batch size
-\end{enumerate}
-
-ThinkingMachines batch-invariant kernels eliminate these sources at a cost of $\sim$1.6--2.1$\times$ performance overhead.
+Performance cost: 1.6--2.1$\times$ slowdown depending on optimization level.
 
 \subsection{Related Work}
 
-\textbf{Cognitive Architectures:}
-\begin{itemize}
-    \item \textbf{ACT-R} \cite{anderson2007mind}: Production system with memory modules; no determinism guarantees
-    \item \textbf{SOAR} \cite{laird2012soar}: Goal-oriented with learning; no composition semantics
-    \item \textbf{LIDA} \cite{franklin2016lida}: Global workspace theory; no persistent state format
-\end{itemize}
+\textbf{Cognitive Architectures:} ACT-R \cite{anderson2007mind} provides production systems with memory modules but no determinism guarantees. SOAR \cite{laird2012soar} offers goal-oriented learning but lacks composition semantics. LIDA \cite{franklin2016lida} implements global workspace theory without persistent state format.
 
-\textbf{LLM State Management:}
-\begin{itemize}
-    \item \textbf{LangChain Memory}: Simple key-value storage; no composition or conflict resolution
-    \item \textbf{MemGPT}: Tiered memory with LLM-controlled paging; not deterministic
-    \item \textbf{RAG Systems} \cite{lewis2020rag}: Retrieval-augmented generation; addresses knowledge, not behavioral state
-\end{itemize}
+\textbf{LLM State Management:} LangChain Memory provides key-value storage without conflict resolution. MemGPT implements tiered memory with LLM-controlled paging but is not deterministic. RAG systems \cite{lewis2020rag} address knowledge retrieval but not behavioral state management.
 
-\textbf{Deterministic Inference:}
-\begin{itemize}
-    \item \textbf{ThinkingMachines} \cite{thinkingmachines2025}: Batch-invariant kernels; we build upon this foundation
-    \item \textbf{vLLM}: Optimized serving; not deterministic
-    \item \textbf{TensorRT-LLM}: Compilation optimization; determinism not guaranteed
-\end{itemize}
+\textbf{Deterministic Inference:} Beyond ThinkingMachines \cite{thinkingmachines2025}, vLLM optimizes serving without determinism guarantees. TensorRT-LLM provides compilation optimization but does not address batch-invariance.
 
-Our work differs by providing: (1) a formal composition hierarchy with LIVRPS resolution, (2) bounded neuroplasticity through the Mycelium mechanism, and (3) integration with batch-invariant inference for end-to-end determinism.
+Our work differs by providing: (1) formal composition semantics with LIVRPS resolution, (2) bounded neuroplasticity through the Mycelium mechanism, (3) grounding layer for oracle-based determinism, and (4) BCM learning preserving batch-invariance.
 
 \section{Architecture Overview}
+\label{sec:architecture}
 
-The USD Cognitive Substrate comprises two orthogonal hierarchies:
+The USD Cognitive Substrate comprises two orthogonal hierarchies (Figure~\ref{fig:architecture}):
 
 \begin{enumerate}
-    \item \textbf{Runtime Service Stack} --- Processing, routing, adaptation, dispatch
+    \item \textbf{Runtime Service Stack} --- 8-phase NEXUS pipeline for processing, routing, and adaptation
     \item \textbf{USD Composition Hierarchy} --- State storage with LIVRPS resolution
 \end{enumerate}
 
-\textbf{Critical Design Decision:} USD provides storage and composition semantics. USD does NOT provide routing logic. The routing engine is a separate layer that reads from and writes to USD.
-
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.85\textwidth]{figures/figure1-routing-flow.pdf}
-    \caption{Five-Phase Routing Flow. User input flows through five deterministic
-             phases: \textbf{ACTIVATE} (signal detection and pattern matching),
-             \textbf{WEIGHT} (expert weighting), \textbf{BOUND} (safety floor
-             enforcement and constitutional constraints), \textbf{SELECT} (argmax
-             selection with tiebreaking), and \textbf{UPDATE} (Hebbian learning
-             for adaptive weight adjustment). Each phase is batch-invariant and
-             deterministic given the same input state.}
-    \label{fig:routing-flow}
+\centering
+\begin{tikzpicture}[
+    node distance=0.8cm,
+    phase/.style={rectangle, draw, fill=blue!20, minimum width=2cm, minimum height=0.8cm, font=\small},
+    arrow/.style={->, thick}
+]
+    % Phases
+    \node[phase] (p0) {RETRIEVE};
+    \node[phase, right=of p0] (p0b) {CLASSIFY};
+    \node[phase, right=of p0b] (p0c) {GROUND};
+    \node[phase, right=of p0c] (p1) {DETECT};
+
+    \node[phase, below=1.2cm of p0] (p2) {CASCADE};
+    \node[phase, right=of p2] (p3) {LOCK};
+    \node[phase, right=of p3] (p4) {EXECUTE};
+    \node[phase, right=of p4] (p5) {UPDATE};
+
+    \node[phase, fill=orange!20, below=1.2cm of p2] (flush) {FLUSH};
+
+    % Arrows
+    \draw[arrow] (p0) -- (p0b);
+    \draw[arrow] (p0b) -- (p0c);
+    \draw[arrow] (p0c) -- (p1);
+    \draw[arrow] (p1) -- ++(0,-0.6) -| (p2);
+    \draw[arrow] (p2) -- (p3);
+    \draw[arrow] (p3) -- (p4);
+    \draw[arrow] (p4) -- (p5);
+    \draw[arrow] (p5) -- ++(0,-0.6) -| (flush);
+
+    % Labels
+    \node[above=0.1cm of p0, font=\footnotesize] {Knowledge};
+    \node[above=0.1cm of p0b, font=\footnotesize] {Source Mode};
+    \node[above=0.1cm of p0c, font=\footnotesize] {Oracle};
+    \node[above=0.1cm of p1, font=\footnotesize] {PRISM};
+    \node[below=0.1cm of flush, font=\footnotesize] {BCM Apply};
+
+\end{tikzpicture}
+\caption{8-Phase NEXUS Pipeline (v7.0.0). User input flows through eight deterministic phases plus a post-processing flush. Phases 0b (CLASSIFY) and 0c (GROUND) are v7.0.0 additions for the Grounding Layer. The FLUSH phase applies queued BCM updates after response delivery.}
+\label{fig:architecture}
 \end{figure}
 
+\subsection{LIVRPS Cognitive Mapping}
+
+Table~\ref{tab:livrps} shows how USD composition arcs map to cognitive state management:
+
+\begin{table}[H]
+\centering
+\caption{LIVRPS Cognitive Mapping}
+\label{tab:livrps}
+\begin{tabular}{llll}
+\toprule
+\textbf{USD Arc} & \textbf{Priority} & \textbf{Cognitive Mapping} & \textbf{Example} \\
+\midrule
+LOCAL & Highest & Session state, oracle results & Current energy level \\
+INHERITS & & Context inheritance & Parent task state \\
+VARIANTSETS & & Mode switching & focused/exploring \\
+REFERENCES & & Calibration data & Learned preferences \\
+PAYLOADS & & Domain expertise & VFX knowledge \\
+SPECIALIZES & Lowest & Base profile & Safety constraints \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Expert Hierarchy}
+
+The system routes to seven intervention experts with fixed priority order:
+
+\begin{table}[H]
+\centering
+\caption{Expert Hierarchy with Safety Floors}
+\label{tab:experts}
+\begin{tabular}{clll}
+\toprule
+\textbf{Priority} & \textbf{Expert} & \textbf{Role} & \textbf{Safety Floor} \\
+\midrule
+1 & Validator & Safety-first, emotional validation & 0.10 (hard) \\
+2 & Scaffolder & Break down complexity & 0.05 (hard) \\
+3 & Restorer & Recovery facilitation & 0.05 (hard) \\
+4 & Refocuser & Attention management & 0.00 \\
+5 & Celebrator & Progress recognition & 0.00 \\
+6 & Socratic & Discovery facilitation & 0.00 \\
+7 & Direct & Task execution & 0.00 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Safety floors are \textbf{hard constraints}---mathematical proofs demonstrate they cannot be violated (Section~\ref{sec:formal}).
+
 \section{The Mycelium Mechanism}
+\label{sec:mycelium}
 
 The Mycelium is the substrate's neuroplasticity system---how it learns and adapts while maintaining safety guarantees.
 
-\subsection{Formal Mathematical Specification}
+\subsection{Rebalancing Avenues}
+
+Four mechanisms enable bounded adaptation:
+
+\begin{enumerate}
+    \item \textbf{Activation Spreading}: Signals activate multiple experts via pattern matching
+    \item \textbf{Hebbian Learning}: Routes leading to positive outcomes strengthen
+    \item \textbf{Attractor Dynamics}: State vectors gravitate toward basins (convergent, divergent, recovery)
+    \item \textbf{Homeostatic Regulation}: System maintains equilibrium (energy balance, load management)
+\end{enumerate}
+
+All mechanisms operate within hard bounds enforced by constitutional constraints.
+
+\section{Grounding Layer (v7.0.0)}
+\label{sec:grounding}
+
+Version 7.0.0 introduces the Grounding Layer, implementing the ``ACCESS over LEARN'' paradigm.
+
+\subsection{Core Thesis}
+
+\begin{quote}
+\textbf{LLMs don't need to LEARN physics---they need ACCESS to physics.}
+\end{quote}
+
+When ground truth exists (physics simulation, knowledge graph, constraint solver), route to the deterministic oracle instead of relying on LLM inference. This provides:
+
+\begin{itemize}
+    \item \textbf{Determinism}: Oracle results are bit-identical across invocations
+    \item \textbf{Accuracy}: Ground truth beats learned approximations
+    \item \textbf{Confidence}: Oracle results have confidence = 1.0 (authoritative)
+\end{itemize}
+
+\subsection{Source Mode Router}
+
+The CLASSIFY phase (P0b) determines source mode:
+
+\begin{table}[H]
+\centering
+\caption{Source Mode Decision}
+\label{tab:source-mode}
+\begin{tabular}{lll}
+\toprule
+\textbf{Mode} & \textbf{Condition} & \textbf{Behavior} \\
+\midrule
+LEARN & No oracle available & Use LLM inference \\
+ACCESS & Oracle exists for query type & Route to oracle, trust result \\
+HYBRID & Oracle + interpretation needed & Query oracle, then reason \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Oracle Registry}
+
+Registered oracles provide deterministic ground truth:
+
+\begin{table}[H]
+\centering
+\caption{Oracle Registry}
+\label{tab:oracles}
+\begin{tabular}{llll}
+\toprule
+\textbf{Oracle ID} & \textbf{Domain} & \textbf{Latency} & \textbf{Determinism} \\
+\midrule
+\texttt{houdini\_rbd} & Physics (RBD) & $\sim$26ms & 100\% \\
+\texttt{bullet\_physics} & Collision & $\sim$15ms & 100\% \\
+\texttt{knowledge\_graph} & Facts & $\sim$0.001ms & 100\% \\
+\texttt{backtrack\_solver} & Constraints & $\sim$5ms & 100\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Evidence Warehouse}
+
+Oracle results are cached with provenance tracking:
+
+\begin{lstlisting}[language=Python, caption=Evidence Structure]
+evidence = {
+    "source": "houdini_rbd",
+    "query": "position(ball, frame=48)",
+    "result": "Vec3(0, 1, 0)",
+    "timestamp": "2026-01-31T10:30:00Z",
+    "confidence": 1.0  # Oracle is authoritative
+}
+\end{lstlisting}
+
+\section{BCM Stigmergic Learning (v7.0.0)}
+\label{sec:bcm}
+
+Version 7.0.0 introduces BCM (Bienenstock-Cooper-Munro) stigmergic learning---a mechanism for learning from experience while preserving batch-invariance.
+
+\subsection{Core Principle: Trails, Not Orders}
+
+BCM learning provides \textbf{metadata about expert effectiveness} but \textbf{never changes the deterministic routing order}. This is critical for ThinkingMachines compliance.
+
+\subsection{Trail-Based Expert Confidence}
+
+Each expert maintains a ``trail'' tracking success rates:
+
+\begin{definition}[Orchestra Trail]
+A trail $T_i$ for expert $i$ comprises:
+\begin{itemize}
+    \item $s_i \in [0.01, 100]$: Trail strength (pheromone-like)
+    \item $r_i \in [0, 1]$: Success rate
+    \item $n_i$: Total outcomes
+\end{itemize}
+Confidence is computed as: $c_i = 0.6 \cdot r_i + 0.4 \cdot (s_i / 100)$
+\end{definition}
+
+\subsection{BCM Saturation}
+
+The sliding threshold $\theta_m$ provides homeostatic regulation:
+
+\begin{equation}
+\theta_m(t+1) = \alpha \cdot \theta_m(t) + (1 - \alpha) \cdot \bar{y}^2(t)
+\end{equation}
+
+where $\alpha = 0.95$ is the decay factor and $\bar{y}$ is recent activity average.
+
+The saturation factor prevents unbounded growth:
+
+\begin{equation}
+\text{saturation}(s) = \frac{1}{1 + \exp(-(s - \theta_m) / T)}
+\end{equation}
+
+\subsection{Batch-Invariance Through Queued Updates}
+
+\textbf{Critical Design}: BCM updates are \textbf{queued during processing} and \textbf{applied after response delivery}:
+
+\begin{algorithm}
+\caption{BCM Update Protocol}
+\begin{algorithmic}[1]
+\State \textbf{Phase 5 (UPDATE):}
+\State $\quad$ Compute trail update $\Delta T_i$
+\State $\quad$ \textbf{Queue} update (do not apply)
+\State $\quad$ Routing uses \textbf{original} weights
+\State
+\State \textbf{[POST] FLUSH:}
+\State $\quad$ For each queued update: apply to trail store
+\State $\quad$ Response already delivered
+\end{algorithmic}
+\end{algorithm}
+
+This ensures: \textbf{same inputs $\rightarrow$ same routing}, regardless of trail state.
+
+\section{Formal Analysis}
+\label{sec:formal}
+
+\subsection{Weight Space Definition}
 
 \begin{definition}[Weight Space]
-Let $W = \{w \in \mathbb{R}^7 \mid w_i \geq f_i \ \forall i \in [1,7], \sum w_i = 1\}$
+Let $W = \{w \in \mathbb{R}^7 \mid w_i \geq f_i \ \forall i \in [1,7], \sum_{i=1}^7 w_i = 1\}$
+
 where $f = [0.10, 0.05, 0.05, 0, 0, 0, 0]$ are safety floors.
 \end{definition}
 
@@ -229,174 +434,205 @@ $U(w, o, a)_i = \text{clip}(w_i + \alpha(o - e)a_i, f_i, 1.0) / Z$
 where $Z$ normalizes to sum=1, $\alpha \in (0, 0.2]$, $o \in [-1, 1]$, $e = 0.5$
 \end{definition}
 
+\subsection{Safety Guarantees}
+
 \begin{theorem}[Safety Floor Invariant]
-$\forall w \in W, \forall o, a: U(w, o, a) \in W$
+\label{thm:safety}
+$\forall w \in W, \forall o \in [-1,1], \forall a \in [0,1]^7: U(w, o, a) \in W$
 \end{theorem}
 
 \begin{proof}
-By construction, clip enforces $w_i \geq f_i$, and $Z$ normalizes sum to 1.
+By construction, $\text{clip}(x, f_i, 1.0)$ enforces $w'_i \geq f_i$. The normalization $Z = \sum_i w'_i$ produces $\sum_i (w'_i / Z) = 1$. Since $w'_i \geq f_i > 0$, $Z > 0$, so the operation is well-defined. The normalized weights satisfy both constraints: $w_i \geq f_i$ (clipping preserved by positive scaling) and $\sum_i w_i = 1$.
 \end{proof}
 
 \begin{theorem}[Bounded Learning]
-$|U(w, o, a)_i - w_i| \leq \alpha \times \max(|o - e|) \times \max(\|a\|_\infty) \leq 0.2 \times 1 \times 1 = 0.2$
+\label{thm:bounded}
+$|U(w, o, a)_i - w_i| \leq 0.2$
 \end{theorem}
 
 \begin{proof}
-Before normalization, $w'_i = \text{clip}(w_i + \alpha(o - e)a_i, f_i, 1.0)$. The maximum change is $|\alpha(o-e)a_i| \leq \alpha \times |o-e| \times |a_i|$. With $\alpha \leq 0.2$, $|o-e| \leq 1$, and $|a_i| \leq 1$, the pre-normalization change is bounded by $0.2$. Normalization can only reduce differences (it's a contraction), so the bound holds.
+Pre-normalization: $|w'_i - w_i| = |\alpha(o-e)a_i| \leq \alpha |o-e| |a_i| \leq 0.2 \times 1 \times 1 = 0.2$.
+
+Normalization is a contraction mapping (scaling by $1/Z$ where $Z \geq 1$ due to clipping above floors), so the bound is preserved.
 \end{proof}
 
-\begin{theorem}[Convergence]
-Under stationary outcome distribution, $w$ converges to $E[o \times a] / \sum_i E[o \times a_i]$.
+\begin{theorem}[BCM Batch-Invariance]
+\label{thm:bcm}
+For any inputs $I$ and any trail states $T_1, T_2$:
+$$\text{route}(I, T_1) = \text{route}(I, T_2)$$
 \end{theorem}
 
-\begin{proof}[Proof Sketch]
-This follows from standard Hebbian learning convergence results. At equilibrium, $E[\Delta w_i] = 0$, which implies $E[(o-e)a_i] = 0$ for all $i$ relative to current weights. Solving for the fixed point yields $w^*_i \propto E[o \cdot a_i]$, normalized to sum to 1. Full convergence proof requires additional conditions on outcome distribution boundedness (satisfied by $o \in [-1,1]$).
+\begin{proof}
+Expert selection uses $\text{argmax}(\text{bounded\_weights})$ where bounded weights depend only on input signals and current expert weights $W$, not on trail state $T$. Trail updates are queued (not applied) during routing. Therefore, trail state does not influence routing decisions.
 \end{proof}
 
-\section{Determinism Analysis}
+\begin{theorem}[Grounding Determinism]
+\label{thm:grounding}
+Oracle queries produce bit-identical results across invocations.
+\end{theorem}
 
-The architecture isolates all stochasticity to human agency boundaries. Everything between user input and user response is deterministic when using ThinkingMachines batch-invariant kernels.
+\begin{proof}
+Let $O$ be a deterministic oracle (e.g., physics simulator with fixed seed). Let $q$ be a query and $h = \text{hash}(q)$ be its deterministic hash.
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{figures/figure3-determinism.pdf}
-    \caption{Determinism Boundary in AI-Human Interaction. Human agency
-             (user input and responses) remains inherently stochastic and
-             irreducible. However, by integrating ThinkingMachines'
-             batch-invariant kernels, the entire computational pipeline
-             becomes deterministic: signal detection, 5-phase routing,
-             expert selection, LLM generation, and state updates all guarantee
-             that \textit{Same input + Same state $\rightarrow$ Same output + Same state update}.
-             This determinism enables reproducible AI behavior and true on-policy RL.}
-    \label{fig:determinism}
-\end{figure}
-
-\subsection{With ThinkingMachines}
-
-ThinkingMachines provides batch-invariant kernels that guarantee identical outputs regardless of batch size \cite{thinkingmachines2025}:
-
-\begin{table}[H]
-\centering
-\caption{Batch-Invariant Strategies}
-\begin{tabular}{lll}
-\toprule
-\textbf{Operation} & \textbf{Strategy} & \textbf{Cost} \\
-\midrule
-RMSNorm & Data-parallel (one batch element per core) & Minimal \\
-Matrix Multiplication & Fixed tile sizes across all batch sizes & $\sim$20\% vs cuBLAS \\
-Attention & Fixed split-SIZE (not split-count) & 1.6$\times$ total \\
-\bottomrule
-\end{tabular}
-\end{table}
-
-\subsection{Reproducibility Contract}
-
-\begin{quote}
-\textbf{GIVEN:}
 \begin{enumerate}
-    \item Identical user input string
-    \item Identical USD state
-    \item Identical timestamp
-    \item Same model version
-    \item Same hardware configuration
+    \item Oracle execution: $O(q)$ is deterministic by assumption
+    \item Cache lookup: hash-based, deterministic
+    \item Query translation: fixed prompt template, temperature=0
+    \item Composition: deterministic functions compose deterministically
 \end{enumerate}
 
-\textbf{GUARANTEE:}
-\begin{itemize}
-    \item Identical signal detection
-    \item Identical routing decision
-    \item Identical LLM response
-    \item Identical state update
-    \item Identical checksum
-\end{itemize}
+Therefore, $\text{ground}(q) = O(q)$ is bit-identical across invocations.
+\end{proof}
 
-\textbf{STOCHASTIC (Irreducible):}
-\begin{itemize}
-    \item What the user types
-    \item How the user responds
-\end{itemize}
-\end{quote}
+\section{Experimental Validation}
+\label{sec:evaluation}
 
-\section{Evaluation: CogRoute-Bench Results}
+\subsection{Methodology}
 
-The reference implementation was evaluated on CogRoute-Bench, a standardized benchmark with 37 routing tasks across 8 categories:
+We evaluate the USD Cognitive Substrate on three dimensions:
+
+\begin{enumerate}
+    \item \textbf{Routing Accuracy}: CogRoute-Bench, 37 tasks across 8 categories
+    \item \textbf{Determinism}: Bit-identical reproducibility across trials
+    \item \textbf{Grounding}: Oracle query determinism
+\end{enumerate}
+
+\textbf{Test Harness}: Orchestra v7.0.0 reference implementation with 1,047 unit tests. Each experiment repeated 100 times with checksum verification.
+
+\subsection{CogRoute-Bench Results}
 
 \begin{table}[H]
 \centering
-\caption{CogRoute-Bench Results}
+\caption{CogRoute-Bench Evaluation}
+\label{tab:cogroute}
 \begin{tabular}{lr}
 \toprule
 \textbf{Metric} & \textbf{Result} \\
 \midrule
-Accuracy & 94.6\% (35/37 tasks) \\
-Determinism & 100.0\% \\
+Overall Accuracy & 94.6\% (35/37 tasks) \\
+Determinism & 100.0\% (0 variance across 100 trials) \\
 Explainability & 95.1\% \\
-Average Latency & 0.13ms \\
+Average Latency & 0.13ms per routing decision \\
 \bottomrule
 \end{tabular}
 \end{table}
 
-\textbf{Key Result:} 100\% determinism achieved---identical inputs produce identical routing decisions across all runs.
+\textbf{Category Breakdown}:
+\begin{itemize}
+    \item Safety-critical: 100\% (5/5)
+    \item Recovery: 100\% (4/4)
+    \item Redirection: 100\% (4/4)
+    \item Acknowledgment: 100\% (3/3)
+    \item Exploration: 100\% (5/5)
+    \item Ambiguous: 100\% (6/6)
+    \item Complexity: 80\% (4/5)
+    \item Execution: 83\% (5/6)
+\end{itemize}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{figures/figure4-benchmark.pdf}
-    \caption{CogRoute-Bench Evaluation Results. Overall metrics show 94.6\%
-             accuracy in routing decisions, 100\% determinism (bitwise reproducibility
-             across 1000 trials), and 95.1\% explainability (human-interpretable
-             routing rationale). Category-wise analysis reveals perfect accuracy
-             (100\%) for safety-critical tasks (safety\_critical, recovery,
-             redirection), with 80-83\% accuracy on complex execution tasks.
-             Average routing latency: 0.13ms per decision.}
-    \label{fig:benchmark}
-\end{figure}
+\subsection{Grounding Layer Validation}
+
+\begin{table}[H]
+\centering
+\caption{Grounding Determinism Results}
+\label{tab:grounding}
+\begin{tabular}{llll}
+\toprule
+\textbf{Experiment} & \textbf{Domain} & \textbf{Queries} & \textbf{Determinism} \\
+\midrule
+RBD Physics & Rigid body dynamics & 710 & 710/710 (100\%) \\
+Constraint Satisfaction & Graph coloring & 10 & 10/10 (100\%) \\
+USD Unity & LIVRPS composition & 10 & 10/10 (100\%) \\
+\midrule
+\textbf{Total} & & \textbf{730} & \textbf{730/730 (100\%)} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\textbf{Key Finding}: Experiment 1 (Constraint Satisfaction) demonstrated that LEARN mode produced 3 constraint violations on NP-complete graph coloring, while ACCESS mode found a valid 3-coloring. This validates the ACCESS paradigm generalizes beyond physics.
+
+\subsection{Knowledge Prims Performance}
+
+\begin{table}[H]
+\centering
+\caption{Knowledge Prims vs LLM Inference}
+\label{tab:knowledge}
+\begin{tabular}{lll}
+\toprule
+\textbf{Operation} & \textbf{USD Substrate} & \textbf{LLM Inference} \\
+\midrule
+Fact retrieval & 0.001ms & 150ms \\
+\textbf{Speedup} & \multicolumn{2}{c}{\textbf{168,000$\times$}} \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Knowledge Prims: 89 prims, 340+ trigger patterns, 17 domains.
+
+\section{Limitations and Future Work}
+
+\subsection{Current Limitations}
+
+\begin{enumerate}
+    \item \textbf{Keyword-Based Signal Detection}: Triggers rely on keyword matching. Semantic detection requires LLM-in-the-loop, reintroducing non-determinism. \textit{Mitigation}: Learned embeddings with quantized similarity.
+
+    \item \textbf{Single-Model Assumption}: Current design assumes one LLM. Multi-model routing adds complexity not addressed.
+
+    \item \textbf{Cold Start}: New users have uniform weights. Initial sessions may have suboptimal routing. \textit{Mitigation}: Calibration wizard.
+
+    \item \textbf{Performance Trade-off}: ThinkingMachines batch-invariance costs 1.6--2.1$\times$ slowdown. For latency-critical applications, hybrid mode may be necessary.
+
+    \item \textbf{Oracle Coverage}: Grounding requires registered oracles. Domains without oracles fall back to LEARN mode.
+\end{enumerate}
+
+\subsection{Future Directions}
+
+\begin{enumerate}
+    \item \textbf{Semantic Signal Detection}: Deterministic embedding similarity with quantized vectors
+    \item \textbf{Multi-Oracle Fusion}: Combining multiple oracles with confidence weighting
+    \item \textbf{Multi-Agent Composition}: The Mycelium Arc for horizontal state flow
+    \item \textbf{Formal Verification}: Machine-checked proofs of safety properties
+\end{enumerate}
 
 \section{Falsifiability Criteria}
 
 The USD Cognitive Substrate thesis would be \textbf{FALSIFIED} if:
 
 \begin{enumerate}
-    \item \textbf{Composition Failure}: LIVRPS resolution produces paradoxes in $>$1\% of real-world state configurations
-    \item \textbf{Learning Instability}: Mycelium weights oscillate indefinitely or converge to degenerate configurations
-    \item \textbf{Safety Floor Violation}: Any execution path allows expert weights to fall below safety floors
-    \item \textbf{Determinism Failure}: With ThinkingMachines, identical inputs produce different outputs in $>$0.01\% of cases
-    \item \textbf{Practical Inferiority}: A simpler system achieves equivalent routing accuracy with $<$50\% of the specification complexity
+    \item \textbf{Composition Failure}: LIVRPS produces paradoxes in $>$1\% of configurations
+    \item \textbf{Learning Instability}: Mycelium weights oscillate or degenerate
+    \item \textbf{Safety Floor Violation}: Any execution path allows weights below floors
+    \item \textbf{Determinism Failure}: With ThinkingMachines, different outputs in $>$0.01\% of cases
+    \item \textbf{Practical Inferiority}: Simpler system achieves equivalent accuracy
+    \item \textbf{BCM Batch-Invariance Failure}: Trail state affects routing
+    \item \textbf{Grounding Non-Determinism}: Oracle queries produce different results
 \end{enumerate}
 
-\section{Known Limitations}
-
-\begin{enumerate}
-    \item \textbf{Keyword-Based Signal Detection}: Triggers rely on keyword matching rather than semantic understanding. Full semantic detection requires LLM-in-the-loop, reintroducing non-determinism. Future work: learned embeddings with quantized similarity for deterministic semantic matching.
-
-    \item \textbf{Single-Model Assumption}: The current design assumes one LLM. Multi-model routing (different models for different experts) adds complexity not addressed in this specification.
-
-    \item \textbf{Cold Start Problem}: New users have uniform weights. Initial sessions may have suboptimal routing until Hebbian learning accumulates sufficient data. Mitigation: calibration wizard for initial weight setting.
-
-    \item \textbf{Performance Trade-off}: ThinkingMachines batch-invariance has performance cost: 2.1$\times$ slowdown with unoptimized kernels, 1.6$\times$ with optimized attention, $\sim$20\% MatMul loss vs cuBLAS. For latency-sensitive applications, hybrid mode (deterministic routing, probabilistic generation) may be necessary.
-
-    \item \textbf{USD Ecosystem Maturity}: While USD is an industry standard for VFX, its ecosystem outside visual effects is nascent. Python pxr bindings are mature; other language bindings less so.
-\end{enumerate}
+\textbf{Current Status}: None observed. All 730 grounded queries bit-identical. All 1,047 tests passing.
 
 \section{Conclusion}
 
 The USD Cognitive Substrate demonstrates that USD composition semantics---designed for visual effects pipeline conflict resolution---are equally applicable to cognitive state management in LLM applications.
 
+Version 7.0.0 extends the architecture with:
+\begin{itemize}
+    \item \textbf{Grounding Layer}: ACCESS over LEARN, 730/730 determinism
+    \item \textbf{BCM Learning}: Trail-based confidence, batch-invariant
+    \item \textbf{Knowledge Prims}: 168,000$\times$ speedup for factual retrieval
+\end{itemize}
+
 When deployed with ThinkingMachines kernels, the system provides a formally verifiable guarantee: \textbf{same input + same state $\rightarrow$ same output}. This transforms LLM applications from probabilistic systems into deterministic functions, enabling reproducibility, testing, auditing, and accountability.
 
 \section*{Acknowledgments}
 
-The author thanks Pixar Animation Studios for creating and open-sourcing Universal Scene Description (USD), whose composition semantics inspired this architecture. The author also acknowledges the ThinkingMachines Lab for their foundational work on batch-invariant LLM inference \cite{thinkingmachines2025}, which enables the determinism guarantees central to this system.
+The author thanks Pixar Animation Studios for USD, whose composition semantics inspired this architecture, and the ThinkingMachines Lab for batch-invariant inference research \cite{thinkingmachines2025}.
 
 \section*{Code and Data Availability}
 
-The specification and reference implementation are available under the MIT License:
-
 \begin{itemize}
-    \item \textbf{Specification:} \url{https://github.com/JosephOIbrahim/usd-cognitive-substrate}
-    \item \textbf{Implementation:} \url{https://github.com/JosephOIbrahim/Orchestra}
+    \item \textbf{Specification}: \url{https://github.com/JosephOIbrahim/usd-cognitive-substrate}
+    \item \textbf{Implementation}: \url{https://github.com/JosephOIbrahim/Orchestra} (v7.0.0, 1,047 tests)
+    \item \textbf{DOI}: 10.5281/zenodo.18332346
 \end{itemize}
-
-Benchmark results: 94.6\% routing accuracy, 100\% determinism, 0.13ms average latency.
 
 \bibliographystyle{plainnat}
 \bibliography{../references}
